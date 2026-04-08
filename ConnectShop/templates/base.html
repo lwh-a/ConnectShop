@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ConnectShop - 전자기기 전문 쇼핑몰</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+
+    <style>
+        /* 애플 스타일: 네비게이션 바 글자 크기와 간격 미세 조정 */
+        .apple-nav .nav-link {
+            font-size: 0.85rem;
+            color: #333 !important;
+            padding: 0.5rem 1rem !important;
+        }
+        .apple-nav .nav-link:hover {
+            color: #000 !important;
+        }
+        /* 드롭다운 메뉴 디자인 (삼성 스타일 둥근 모서리 및 그림자) */
+        .dropdown-menu {
+            border: none;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <nav class="navbar navbar-expand-lg navbar-light bg-light border-bottom apple-nav py-2">
+            <div class="container">
+                <a class="navbar-brand fs-4 logo-container" href="/">
+                    <img src="{{ url_for('static', filename='images/logo.png') }}" alt="ConnectShop 로고" class="header-logo">
+                </a>
+                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNavbar">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+                <div class="collapse navbar-collapse justify-content-center" id="mainNavbar">
+                    <ul class="navbar-nav">
+                        <li class="nav-item"><a class="nav-link" href="#">스마트폰</a></li>
+                        <li class="nav-item"><a class="nav-link" href="#">무선이어폰</a></li>
+                        <li class="nav-item"><a class="nav-link" href="#">스마트워치</a></li>
+                        <li class="nav-item"><a class="nav-link" href="#">태블릿</a></li>
+                        <li class="nav-item"><a class="nav-link" href="#">노트북</a></li>
+                        <li class="nav-item"><a class="nav-link" href="#">헤드폰</a></li>
+                        <li class="nav-item"><a class="nav-link" href="#">스피커</a></li>
+                    </ul>
+                </div>
+
+                <div class="collapse navbar-collapse justify-content-end" id="iconNavbar">
+                    <ul class="navbar-nav align-items-center">
+                        <li class="nav-item me-2">
+                            <a class="nav-link fs-5" href="#"><i class="bi bi-search"></i></a>
+                        </li>
+                        <li class="nav-item me-2">
+                            <a class="nav-link fs-5" href="#"><i class="bi bi-bag"></i></a>
+                        </li>
+                        <li class="nav-item dropdown">
+                            <a class="nav-link fs-5" href="#" id="myPageDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="bi bi-person"></i>
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-end py-2" aria-labelledby="myPageDropdown">
+                                <li><a class="dropdown-item fw-bold" href="#">로그인/회원가입</a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item" href="#">주문/배송조회</a></li>
+                                <li><a class="dropdown-item" href="#">멤버십</a></li>
+                                <li><a class="dropdown-item" href="#">고객지원</a></li>
+                                <li><a class="dropdown-item" href="#">나의 쿠폰</a></li>
+                            </ul>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <main class="container my-5 min-vh-100">
+        {% block content %}
+
+        {% endblock %}
+    </main>
+
+    <footer class="bg-light text-center text-muted py-4 border-top">
+        <div class="container">
+            <div class="row mb-3">
+                <div class="col-md-3"><strong>회사소개</strong></div>
+                <div class="col-md-3"><strong>이용약관</strong></div>
+                <div class="col-md-3"><strong>개인정보처리방침</strong></div>
+                <div class="col-md-3"><strong>고객지원 (FAQ)</strong></div>
+            </div>
+            <p class="mb-0">© 2026 ConnectShop. All rights reserved.</p>
+            <p class="small">사업자등록번호: 123-45-67890 | 대표자: OOO | 고객센터: 1588-0000</p>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

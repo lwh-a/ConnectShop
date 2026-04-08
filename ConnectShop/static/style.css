@@ -1,0 +1,29 @@
+/* ConnectShop/static/style.css 에 추가 */
+
+/* 로고를 감싸는 컨테이너 간격 조절 */
+.logo-container {
+    padding: 0;
+    display: flex;
+    align-items: center;
+}
+
+/* 로고 이미지 크기 및 깔끔한 fit 설정 */
+.header-logo {
+    height: 48px; /* 헤더 크기에 맞춰 조절 (예: 48~56px) */
+    width: auto;  /* 비율 유지 */
+    object-fit: contain; /* 영역 안에서 비율 유지 */
+}
+
+/* (옵션) 로고 텍스트 디자인 */
+.logo-text {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #333;
+}
+
+#myPageDropdown .bi-person {
+    font-size: 1.25em; /* 기존(1em)보다 1.25배 크게 설정. 필요에 따라 숫자 조절 */
+    /* 아이콘이 커지면서 위로 살짝 올라가 보일 수 있으므로 위치 미세 조정 */
+    position: relative;
+    top: 1px;
+}
