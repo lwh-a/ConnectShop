@@ -1,42 +1,44 @@
 {% extends 'base.html' %}
+
 {% block content %}
+<link rel="stylesheet" href="{{ url_for('static', filename='auth_style.css') }}">
 
-<div class="container">
-  <h5 class="my-3 border-bottom pb-2">회원정보를 입력해 주세요</h5>
+    <h5 class="signup-title">회원정보를 입력해 주세요</h5>
 
-  <form method="post" novalidate>
-    {{ form.csrf_token() }}
+    <form method="post" novalidate class="signup-form">
+        {{ form.csrf_token }}
+        {% include 'form_errors.html' %}
 
-    {% include 'form_errors.html' %}
+        <div class="input-group">
+            {{ form.email.label }}
+            {{ form.email(class="form-control auth-input", placeholder="이메일을 입력하세요") }}
+        </div>
 
-    <div class="mb-3">
-      {{ form.email.label(class="form-label") }}
-      {{ form.email(class="form-control") }}
+        <div class="input-group">
+            {{ form.password1.label }}
+            {{ form.password1(class="form-control auth-input", placeholder="비밀번호를 입력하세요") }}
+        </div>
+
+        <div class="input-group">
+            {{ form.password2.label }}
+            {{ form.password2(class="form-control auth-input", placeholder="비밀번호를 한 번 더 입력하세요") }}
+        </div>
+
+        <div class="input-group">
+            {{ form.username.label }}
+            {{ form.username(class="form-control auth-input", placeholder="이름을 입력하세요") }}
+        </div>
+
+        <div class="input-group">
+            {{ form.phone.label }}
+            {{ form.phone(class="form-control auth-input", placeholder="핸드폰 번호를 입력하세요 (예: 01012345678)") }}
+        </div>
+
+        <button type="submit" class="auth-btn">동의하고 가입하기</button>
+    </form>
+
+    <div class="login-link">
+        <p>이미 계정이 있으신가요? <a href="{{ url_for('auth.login') }}">로그인</a></p>
     </div>
-
-    <div class="mb-3">
-      {{ form.password1.label(class="form-label") }}
-      {{ form.password1(class="form-control") }}
-    </div>
-
-    <div class="mb-3">
-      {{ form.password2.label(class="form-label") }}
-      {{ form.password2(class="form-control") }}
-    </div>
-
-    <div class="mb-3">
-      {{ form.username.label(class="form-label") }}
-      {{ form.username(class="form-control") }}
-    </div>
-
-    <div class="mb-3">
-      {{ form.phone.label(class="form-label") }}
-      {{ form.phone(class="form-control") }}
-    </div>
-
-    <button type="submit" class="btn btn-primary">회원가입</button>
-    <a href="{{ url_for('auth.login') }}" class="btn btn-link">이미 계정이 있으신가요? 로그인</a>
-  </form>
 </div>
-
 {% endblock %}

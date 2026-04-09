@@ -28,6 +28,7 @@ class UserLoginForm(FlaskForm):
 class FindIdForm(FlaskForm):
     username = StringField('이름', validators=[DataRequired('가입하신 이름을 입력해주세요.')])
 
+
 class ResetPasswordForm(FlaskForm):
     # 비밀번호 재설정을 위해 아이디와 이메일 확인이 필요합니다.
     username = StringField('이름', validators=[DataRequired('이름를 입력해주세요.')])
