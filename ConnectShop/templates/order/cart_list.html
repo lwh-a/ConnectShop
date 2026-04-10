@@ -1,72 +1,269 @@
 {% extends 'base.html' %}
 {% block content %}
-<div class="container my-5">
-    <h2 class="mb-4">장바구니</h2>
+<style>
+    .cart-container {
+        max-width: 1100px; /* 중앙 집중도를 위해 너비 조정 */
+        margin: 0 auto;
+        padding: 60px 20px;
+    }
+
+    .cart-title {
+        font-size: 28px;
+        font-weight: 600;
+        text-align: center;
+        margin-bottom: 50px;
+        letter-spacing: -0.02em;
+    }
+
+    .cart-item {
+        display: flex;
+        align-items: center;
+        padding: 30px 0;
+        border-bottom: 1px solid #d2d2d7;
+        gap: 25px;
+    }
+
+    /* 이미지 구역 */
+    .item-image-box {
+        width: 120px;
+        height: 120px;
+        background-color: #f5f5f7;
+        border-radius: 12px;
+        overflow: hidden;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+    }
+    .item-image-box img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+    .image-placeholder {
+        font-size: 12px;
+        color: #86868b;
+    }
+
+    /* 정보 구역 */
+    .item-info {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+    }
+    .item-name {
+        font-size: 19px;
+        font-weight: 600;
+        margin-bottom: 6px;
+        color: #1d1d1f;
+    }
+    .item-description {
+        font-size: 14px;
+        color: #86868b;
+        margin-bottom: 0;
+        line-height: 1.5;
+        max-width: 400px;
+    }
+
+    /* 수량 조절 */
+    .item-quantity {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        padding: 0 30px;
+    }
+    .qty-btn {
+        text-decoration: none;
+        color: #1d1d1f;
+        font-size: 20px;
+        width: 32px;
+        height: 32px;
+        border: 1px solid #d2d2d7;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: background-color 0.2s;
+    }
+    .qty-btn:hover { background-color: #f5f5f7; }
+    .qty-num { font-size: 16px; font-weight: 500; min-width: 20px; text-align: center; }
+
+    /* 금액 및 삭제 그룹 */
+    .item-price-group {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-end; /* 우측 정렬 */
+        min-width: 140px;
+        gap: 10px;
+    }
+    .item-price {
+        font-size: 19px;
+        font-weight: 600;
+        color: #1d1d1f;
+    }
+    .item-delete-link {
+        font-size: 14px;
+        color: #0066cc;
+        text-decoration: none;
+    }
+    .item-delete-link:hover { text-decoration: underline; }
+
+    /* 하단 요약 섹션 */
+    .cart-summary {
+        margin-top: 40px;
+        display: flex;
+        flex-direction: column;
+        align-items: flex-end;
+        padding: 40px 0;
+    }
+    .summary-line {
+        width: 100%;
+        max-width: 350px;
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 12px;
+        font-size: 16px;
+        color: #1d1d1f;
+    }
+    .summary-total {
+        margin-top: 15px;
+        padding-top: 20px;
+        border-top: 1px solid #d2d2d7;
+        font-size: 24px;
+        font-weight: 700;
+    }
+
+    .btn-checkout {
+        background-color: #0071e3;
+        color: white;
+        border: none;
+        padding: 18px 50px;
+        border-radius: 12px;
+        font-size: 17px;
+        font-weight: 600;
+        margin-top: 30px;
+        cursor: pointer;
+        transition: background-color 0.2s;
+    }
+    .btn-checkout:hover { background-color: #0077ed; }
+
+    .empty-cart { text-align: center; padding: 100px 0; }
+    .empty-cart p { color: #86868b; font-size: 18px; margin-bottom: 20px; }
+</style>
+
+<div class="cart-container">
+    <h1 class="cart-title">장바구니</h1>
 
     {% if cart_list %}
-    <div class="table-responsive">
-        <table class="table table-hover">
-            <thead class="table-light">
-                <tr>
-                    <th style="width: 40%">상품명</th>
-                    <th style="width: 25%" class="text-center">수량</th>
-                    <th style="width: 20%" class="text-end">금액</th>
-                    <th style="width: 15%" class="text-center">관리</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for item in cart_list %}
-                <tr>
-                    <td class="align-middle">
-                        <strong>{{ item.product.name }}</strong>
-                    </td>
+        {% for item in cart_list %}
+        <div class="cart-item">
+            <div class="item-image-box">
+                {% if item.product.image_path %}
+                    <img src="{{ url_for('static', filename=item.product.image_path) }}" alt="상품 이미지">
+                {% else %}
+                    <div class="image-placeholder">No Image</div>
+                {% endif %}
+            </div>
 
-                    <td class="align-middle text-center">
-                        <div class="btn-group shadow-sm" role="group">
-                            <a href="{{ url_for('order.modify', product_id=item.product.id, action='dec') }}"
-                               class="btn btn-sm btn-light border {{ 'disabled' if item.quantity <= 1 }}">-</a>
+            <div class="item-info">
+                <span class="item-name">{{ item.product.name }}</span>
+                <p class="item-description">
+                    {{ item.product.description if item.product.description else "이 제품에 대한 상세 설명이 이곳에 표시됩니다." }}
+                </p>
+            </div>
 
-                            <span class="btn btn-sm btn-white border-top border-bottom disabled" style="width: 40px;">
-                                {{ item.quantity }}
-                            </span>
+            <div class="item-quantity">
+                <button type="button" class="qty-btn" onclick="updateQuantity({{ item.product.id }}, 'dec', this)">−</button>
+                <span class="qty-num" id="qty-{{ item.product.id }}">{{ item.quantity }}</span>
+                <button type="button" class="qty-btn" onclick="updateQuantity({{ item.product.id }}, 'inc', this)">+</button>
+            </div>
 
-                            <a href="{{ url_for('order.modify', product_id=item.product.id, action='inc') }}"
-                               class="btn btn-sm btn-light border">+</a>
-                        </div>
-                    </td>
-
-                    <td class="align-middle text-end">
-                        {{ (item.product.price * item.quantity) }}원
-                    </td>
-
-                    <td class="align-middle text-center">
-                        <a href="{{ url_for('order.delete', product_id=item.product.id) }}"
-                           class="btn btn-sm btn-outline-danger"
-                           onclick="return confirm('이 상품을 삭제하시겠습니까?')">삭제</a>
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </div>
-
-    <div class="card mt-4 border-0 shadow-sm">
-        <div class="card-body d-flex justify-content-between align-items-center">
-            <h4 class="mb-0">총 결제 금액</h4>
-            <h3 class="text-primary mb-0">{{ total_price }}원</h3>
+            <div class="item-price-group">
+                <div class="item-price">
+                    {{ "{:,}".format(item.product.price * item.quantity) }}원
+                </div>
+                <a href="{{ url_for('order.delete', product_id=item.product.id) }}"
+                   class="item-delete-link" onclick="return confirm('삭제하시겠습니까?')">삭제</a>
+            </div>
         </div>
-    </div>
+        {% endfor %}
 
-    <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4">
-        <a href="{{ url_for('main.index') }}" class="btn btn-outline-secondary">쇼핑 계속하기</a>
-        <button class="btn btn-primary btn-lg px-5">결제하기</button>
-    </div>
-
+        <div class="cart-summary">
+            <div class="summary-line">
+                <span>주문 금액</span>
+                <span>{{ "{:,}".format(total_price|int) }}원</span>
+            </div>
+            <div class="summary-line">
+                <span>배송비</span>
+                <span>무료</span>
+            </div>
+            <div class="summary-line summary-total">
+                <span>총 결제 금액</span>
+                <span>{{ "{:,}".format(total_price|int) }}원</span>
+            </div>
+            <a href="{{ url_for('order.checkout') }}" style="text-decoration: none;">
+                <button class="btn-checkout">결제 확인</button>
+            </a>
+        </div>
     {% else %}
-    <div class="text-center py-5">
-        <p class="lead text-muted">장바구니가 비어 있습니다.</p>
-        <a href="{{ url_for('main.index') }}" class="btn btn-primary">상품 보러가기</a>
-    </div>
+        <div class="empty-cart">
+            <p>장바구니가 비어 있습니다.</p>
+            <a href="{{ url_for('main.index') }}" class="btn btn-primary">쇼핑 시작하기</a>
+        </div>
     {% endif %}
 </div>
+
+{% block script %}
+<script>
+async function updateQuantity(productId, action, btnElement) {
+    // 1. 감소 버튼 클릭 시 수량이 1이면 삭제 확인창 띄우기
+    const qtySpan = document.getElementById(`qty-${productId}`);
+    let currentQty = parseInt(qtySpan.innerText);
+
+    if (action === 'dec' && currentQty <= 1) {
+        if (confirm("상품을 장바구니에서 삭제하시겠습니까?")) {
+            // 삭제 라우트로 이동 (삭제는 페이지 새로고침이 일어나는 게 명확하므로 기존 로직 활용)
+            location.href = `/order/delete/${productId}`;
+        }
+        return;
+    }
+
+    // 2. 서버에 비동기(POST) 요청 전송
+    try {
+        const response = await fetch(`/order/modify/${productId}/${action}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
+
+        if (!response.ok) throw new Error('네트워크 응답에 문제가 발생했습니다.');
+
+        const data = await response.json();
+
+        if (data.success) {
+            // 3. 화면 UI 업데이트 (스크롤 이동 없이 숫자만 변경)
+
+            // 수량 업데이트
+            qtySpan.innerText = data.new_quantity;
+
+            // 개별 상품 합계 금액 업데이트
+            const row = btnElement.closest('.cart-item');
+            row.querySelector('.item-price').innerText = data.item_total + '원';
+
+            // 하단 결제 요약 영역 업데이트 (주문 금액, 총 결제 금액)
+            const summaryLines = document.querySelectorAll('.summary-line span:last-child');
+            summaryLines.forEach(span => {
+                if (span.innerText.includes('원')) {
+                    span.innerText = data.total_price + '원';
+                }
+            });
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        alert('수량 변경 중 오류가 발생했습니다.');
+    }
+}
+</script>
+{% endblock %}
 {% endblock %}

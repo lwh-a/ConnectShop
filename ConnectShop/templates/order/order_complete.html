@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+{% block content %}
+<div style="max-width: 600px; margin: 100px auto; text-align: center; padding: 40px;">
+    <div style="font-size: 50px; margin-bottom: 20px;">✅</div>
+    <h1 style="font-size: 32px; font-weight: 600; margin-bottom: 10px;">감사합니다. 주문이 완료되었습니다.</h1>
+    <p style="color: #86868b; font-size: 18px; margin-bottom: 40px;">
+        주문 번호: #{{ order.id }}<br>
+        곧 배송 정보를 문자로 안내해 드리겠습니다.
+    </p>
+
+    <div style="background: #f5f5f7; padding: 30px; border-radius: 18px; text-align: left; margin-bottom: 40px;">
+        <h3 style="margin-bottom: 15px;">배송지 정보</h3>
+        <p><strong>수령인:</strong> {{ order.recipient }}</p>
+        <p><strong>주소:</strong> {{ order.address }}</p>
+        <p><strong>결제 금액:</strong> {{ "{:,}".format(order.total_price) }}원</p>
+    </div>
+
+    <a href="{{ url_for('main.index') }}" style="display: inline-block; background: #0071e3; color: white; padding: 15px 30px; border-radius: 12px; text-decoration: none; font-weight: 600;">
+        계속 쇼핑하기
+    </a>
+</div>
+{% endblock %}
