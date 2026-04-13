@@ -28,7 +28,7 @@ def create_app():
     from .views import main_views, auth_views, order_views
     app.register_blueprint(main_views.bp)
     app.register_blueprint(auth_views.bp)
-    app.register_blueprint(order_views.bp)
+    app.register_blueprint(order_views.bp, url_prefix='/order')
 
     # 나중에 views 폴더 안에 각 기능별 파일을 완성하면 아래 주석을 풀고 연결할 것입니다.
     # ----------------------------------------------------

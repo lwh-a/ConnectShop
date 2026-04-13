@@ -3,6 +3,7 @@
 {% block content %}
 <link rel="stylesheet" href="{{ url_for('static', filename='auth_style.css') }}">
 
+<div class="auth-container">
     <h5 class="login-title">로그인</h5>
 
     <form method="post" novalidate class="login-form">
@@ -33,12 +34,13 @@
     </div>
 
     <div class="social-login-section">
-        {# <a href="{{ url_for('auth.kakao_login') }}" class="social-btn kakao"> #}
-            <img src="{{ url_for('static', filename='images/kakao_icon.png') }}" alt="K"> 카카오로 로그인하기
+        <a href="#" class="social-btn kakao">
+            <img src="{{ url_for('static', filename='images/kakao_icon.png') }}"> 카카오 로그인
         </a>
-        {# <a href="{{ url_for('auth.google_login') }}" class="social-btn google"> #}
-            <img src="{{ url_for('static', filename='images/google_icon.png') }}" alt="G"> 구글로 로그인하기
+        <a href="#" class="social-btn google">
+            <img src="{{ url_for('static', filename='images/google_icon.png') }}"> 구글 로그인
         </a>
     </div>
 </div>
+
 {% endblock %}

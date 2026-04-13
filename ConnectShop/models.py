@@ -6,7 +6,7 @@ class User(db.Model):
     username = db.Column(db.String(150), unique=True , nullable=False)
     password = db.Column(db.String(200), nullable=False)
     email = db.Column(db.String(120), unique=True , nullable=False)
-    phone = db.Column(db.String(11), unique=True , nullable=False)
+    phone = db.Column(db.String(11), nullable=False)
 
 # 임시로 정의한 상품 모델
 class Product(db.Model):

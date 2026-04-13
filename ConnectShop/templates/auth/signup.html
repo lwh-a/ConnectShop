@@ -3,8 +3,8 @@
 {% block content %}
 <link rel="stylesheet" href="{{ url_for('static', filename='auth_style.css') }}">
 
+<div class="signup-container">
     <h5 class="signup-title">회원정보를 입력해 주세요</h5>
-
     <form method="post" novalidate class="signup-form">
         {{ form.csrf_token }}
         {% include 'form_errors.html' %}
@@ -34,7 +34,7 @@
             {{ form.phone(class="form-control auth-input", placeholder="핸드폰 번호를 입력하세요 (예: 01012345678)") }}
         </div>
 
-        <button type="submit" class="auth-btn">동의하고 가입하기</button>
+        <button type="submit" class="auth-btn">회원가입</button>
     </form>
 
     <div class="login-link">

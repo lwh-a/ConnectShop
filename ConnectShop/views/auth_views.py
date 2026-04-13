@@ -1,8 +1,13 @@
+import functools
+
 from flask import Blueprint, render_template, request, redirect, url_for, flash, session, g
+from sqlalchemy.exc import IntegrityError
 from werkzeug.security import generate_password_hash, check_password_hash
 from ConnectShop import db
-from ConnectShop.forms import UserCreateForm, UserLoginForm, FindIdForm, ResetPasswordForm
+from ConnectShop.forms import UserCreateForm, UserLoginForm, FindIdForm, ResetPasswordForm, UserUpdateForm
 from ConnectShop.models import User
+
+
 
 bp = Blueprint('auth', __name__, url_prefix='/auth')
 
@@ -13,27 +18,38 @@ def signup():
     form = UserCreateForm()
     if request.method == 'POST' and form.validate_on_submit():
         # 중복 검사: 이메일과 이름(username) 기준
-        user_email = User.query.filter_by(email=form.email.data).first()
-        user_name = User.query.filter_by(username=form.username.data).first()
 
-        if not user_email and not user_name:
-            user = User(
-                email=form.email.data,
-                password=generate_password_hash(form.password1.data),  # 암호화 저장
-                username=form.username.data,
-                phone=form.phone.data
-            )
+        if User.query.filter_by(email=form.email.data).first():
+            flash('이미 등록된 이메일입니다.')
+            return render_template('auth/signup.html', form=form)
+
+        if User.query.filter_by(username=form.username.data).first():
+            flash('이미 존재하는 이름입니다.')
+            return render_template('auth/signup.html', form=form)
+
+        if User.query.filter_by(phone=form.phone.data).first():
+            flash('이미 존재하는 전화번호입니다.')
+            return render_template('auth/signup.html', form=form)
+
+        user = User(
+            email=form.email.data,
+            username=form.username.data,
+            phone=form.phone.data,
+            password=generate_password_hash(form.password1.data)
+        )
+
+        try:
             db.session.add(user)
             db.session.commit()
-            flash('회원가입이 완료되었습니다. 로그인 해주세요.')
-            return redirect(url_for('auth.login'))
-        elif user_name:
-            flash('이미 존재하는 이름입니다.')
-        else:
-            flash('이미 존재하는 이메일입니다.')
+        except IntegrityError:
+            db.session.rollback()
+            flash('이미 가입된 정보가 있습니다.')
+            return render_template('auth/signup.html', form=form)
+
+        flash('회원가입이 완료되었습니다. 로그인 해주세요.')
+        return redirect(url_for('auth.login'))
 
     return render_template('auth/signup.html', form=form)
-
 
 
 @bp.route('/login', methods=['GET', 'POST'])
@@ -109,7 +125,7 @@ def find_password():
                            reset_pw_form=reset_pw_form)
 
 
-# 로그인 상태 확인 (g 객체 활용)
+# 라우팅 함수보다 먼저 실행하는 함수
 @bp.before_app_request
 def load_logged_in_user():
     user_id = session.get('user_id')
@@ -117,6 +133,31 @@ def load_logged_in_user():
         g.user = None
     else:
         g.user = User.query.get(user_id)
+
+
+# 데코레이션 함수 (멤버십처럼 진행도?)
+def login_required(view):
+    @functools.wraps(view)
+    def wrapped_view(*args, **kwargs):
+        if g.user is None:
+            _next = request.url if request.method == 'GET' else ''
+            return redirect(url_for('auth.login', next=_next))
+        return view(*args, **kwargs)
+
+    return wrapped_view
+
+
+@bp.route('/mypage')
+@login_required
+def mypage():
+    return render_template('auth/mypage.html')
+
+
+@bp.route('/orders')
+@login_required
+def cart_list():
+    return render_template('order/cart_list.html')
+
 
 #구글 로그인
 #

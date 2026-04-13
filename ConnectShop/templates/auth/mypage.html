@@ -1,189 +1,12 @@
-<!DOCTYPE html>
-<html lang="ko">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>마이페이지 - 나의 정보</title>
-    <style>
-        :root {
-            --bg-gray: #f4f4f4;
-            --border-color: #ddd;
-            --text-main: #333;
-            --point-color: #007bff;
-            --nav-bg: #fff;
-        }
+{% extends 'base.html' %}
 
-        body {
-            font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
-            margin: 0;
-            padding: 20px;
-            background-color: #fff;
-            color: var(--text-main);
-            line-height: 1.6;
-        }
-
-        .container {
-            max-width: 800px;
-            margin: 0 auto;
-        }
-
-        /* --- 추가된 상단 네비게이션 스타일 --- */
-        .my-info-title {
-            font-size: 1.5rem;
-            font-weight: bold;
-            margin-bottom: 20px;
-            padding-bottom: 10px;
-            border-bottom: 2px solid #333;
-        }
-
-        .nav-container {
-            margin-bottom: 30px;
-            border-bottom: 1px solid var(--border-color);
-        }
-
-        .nav-main {
-            display: flex;
-            list-style: none;
-            padding: 0;
-            margin: 0;
-            overflow-x: auto;
-            white-space: nowrap;
-        }
-
-        .nav-item {
-            padding: 12px 20px;
-            cursor: pointer;
-            font-weight: 500;
-            color: #666;
-            transition: all 0.2s;
-            border-bottom: 3px solid transparent;
-        }
-
-        .nav-item:hover, .nav-item.active {
-            color: var(--point-color);
-            border-bottom: 3px solid var(--point-color);
-        }
-
-        .sub-menu-display {
-            background-color: #f9f9f9;
-            padding: 15px 20px;
-            margin-top: -1px;
-            border-bottom: 1px solid var(--border-color);
-            display: none; /* 기본적으로 숨김 */
-        }
-
-        .sub-menu-list {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 15px;
-            list-style: none;
-            padding: 0;
-            margin: 0;
-        }
-
-        .sub-menu-list li a {
-            text-decoration: none;
-            color: #444;
-            font-size: 0.9rem;
-        }
-
-        .sub-menu-list li a:hover {
-            color: var(--point-color);
-            text-decoration: underline;
-        }
-        /* ---------------------------------- */
-
-        /* 기존 스타일 유지 */
-        .info-header {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 15px;
-            margin-bottom: 15px;
-        }
-
-        .card {
-            background-color: var(--bg-gray);
-            padding: 20px;
-            border-radius: 8px;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-        }
-
-        .user-info h2 { margin: 0 0 5px 0; font-size: 1.2rem; }
-        .user-info p { margin: 0; color: #666; font-size: 0.9rem; }
-        .edit-link { margin-top: 10px; font-size: 0.85rem; color: #333; text-decoration: underline; cursor: pointer; }
-
-        .membership { text-align: center; }
-        .grade { font-weight: bold; font-size: 1.5rem; color: var(--point-color); }
-
-        .benefits {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 15px;
-            margin-bottom: 30px;
-        }
-
-        .benefit-item {
-            background-color: var(--bg-gray);
-            padding: 15px 20px;
-            border-radius: 8px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        .benefit-label { font-size: 0.9rem; font-weight: bold; }
-        .benefit-value { font-weight: bold; }
-        .sub-link { font-size: 0.75rem; color: #777; text-decoration: none; border: 1px solid #ccc; padding: 2px 6px; border-radius: 4px; }
-
-        .status-bar {
-            display: flex;
-            justify-content: space-around;
-            align-items: center;
-            background-color: #fffbe6;
-            padding: 20px 0;
-            border-radius: 8px;
-            margin-bottom: 40px;
-            text-align: center;
-        }
-
-        .status-item { flex: 1; position: relative; }
-        .status-item:not(:last-child)::after {
-            content: ""; position: absolute; right: 0; top: 20%; height: 60%; width: 1px; background-color: #ccc;
-        }
-
-        .icon-box { width: 40px; height: 40px; background-color: #cbd5e0; margin: 0 auto 8px; border-radius: 4px; }
-        .status-label { font-size: 0.75rem; display: block; margin-bottom: 4px; }
-        .status-count { font-weight: bold; font-size: 1.1rem; }
-
-        .section-title {
-            display: flex; justify-content: space-between; align-items: flex-end;
-            margin-bottom: 15px; border-bottom: 1px solid #eee; padding-bottom: 10px;
-        }
-        .section-title h3 { margin: 0; font-size: 1.1rem; }
-        .view-all { font-size: 0.8rem; text-decoration: underline; color: #666; cursor: pointer; }
-
-        .register-banner {
-            background-color: var(--bg-gray); text-align: center; padding: 30px; border-radius: 8px; margin-bottom: 40px;
-        }
-        .btn-reg {
-            display: inline-block; margin-top: 15px; padding: 10px 25px; background-color: #333; color: #fff;
-            text-decoration: none; border-radius: 4px; font-size: 0.9rem;
-        }
-
-        .product-scroll { display: flex; gap: 15px; overflow-x: auto; padding-bottom: 15px; }
-        .product-card { min-width: 180px; flex: 0 0 auto; }
-        .product-img { width: 100%; aspect-ratio: 345/720; background-color: var(--bg-gray); border-radius: 6px; margin-bottom: 10px; }
-        .p-info .brand { font-size: 0.75rem; color: #888; }
-        .p-info .name { font-size: 0.9rem; font-weight: 500; display: block; margin-bottom: 5px; }
-        .p-info .price { font-weight: bold; font-size: 1rem; }
-    </style>
-</head>
-<body>
+{% block content %}
+<link rel="stylesheet" href="{{ url_for('static', filename='mstyle.css') }}">
 
 <div class="container">
-    <div class="my-info-title">나의 정보</div>
+    <div class="my-info-title">마이페이지</div>
 
+    <!-- 상단 네비게이션 -->
     <nav class="nav-container">
         <ul class="nav-main">
             <li class="nav-item" onclick="showSubMenu('account', this)">나의 계정정보</li>
@@ -196,39 +19,44 @@
         </ul>
     </nav>
 
+    <!-- 서브메뉴 영역 -->
     <div id="subMenuDisplay" class="sub-menu-display">
-        <ul id="subMenuList" class="sub-menu-list">
-            </ul>
+        <ul id="subMenuList" class="sub-menu-list"></ul>
     </div>
 
-    <div class="info-header">
-        <div class="card user-info">
-            <h2>홍길동</h2>
-            <p>hong1234</p>
-            <span class="edit-link">나의정보 수정하기 &gt;</span>
+    <!-- 프로필 카드 -->
+    <div class="profile-card">
+        <div class="profile-img">
+            <i class="bi bi-person-circle" style="font-size: 3rem;"></i>
         </div>
-        <div class="card membership">
-            <div style="font-size: 0.8rem; color: #666;">MEMBERSHIP</div>
-            <div class="grade">VIP</div>
-        </div>
-    </div>
-
-    <div class="benefits">
-        <div class="benefit-item">
-            <div>
-                <div class="benefit-label">보유 포인트</div>
-                <div class="benefit-value">1,500 P</div>
+        <div class="profile-detail">
+            <div class="user-name">
+                {% if g.user %}
+                {{ g.user.username }}님 반가워요!
+                {% else %}
+                로그인이 필요합니다.
+                {% endif %}
             </div>
-            <a href="#" class="sub-link">선물하기</a>
-        </div>
-        <div class="benefit-item">
-            <div>
-                <div class="benefit-label">사용 가능 쿠폰</div>
-                <div class="benefit-value">0 장</div>
-            </div>
+            <div class="user-email">{{ g.user.email if g.user else '' }}</div>
         </div>
     </div>
 
+    <!-- 두 번째 네비게이션 -->
+    <div class="nav-container">
+        <div class="nav-item active" onclick="showSubMenu('benefit', this)">나의 혜택</div>
+        <div class="nav-item" onclick="showSubMenu('shopping', this)">쇼핑 기록</div>
+        <div class="nav-item" onclick="showSubMenu('wishlist', this)">관심 목록</div>
+    </div>
+
+    <!-- 두 번째 서브메뉴 -->
+    <div id="subMenuArea" class="sub-menu-area">
+        <ul id="subMenuList2">
+            <li><a href="#">쿠폰함</a></li>
+            <li><a href="#">포인트 내역</a></li>
+        </ul>
+    </div>
+
+    <!-- 상태바 -->
     <div class="status-bar">
         <div class="status-item">
             <div class="icon-box"></div>
@@ -257,6 +85,7 @@
         </div>
     </div>
 
+    <!-- 제품 관리 -->
     <section>
         <div class="section-title">
             <h3>나의 제품 관리</h3>
@@ -268,9 +97,10 @@
         </div>
     </section>
 
+    <!-- 추천 제품 -->
     <section>
         <div class="section-title">
-            <h3>홍길동님을 위한 맞춤 제품</h3>
+            <h3>{{ g.user.username if g.user else '고객' }}님을 위한 맞춤 제품</h3>
         </div>
         <div class="product-scroll">
             <div class="product-card">
@@ -294,16 +124,26 @@
 </div>
 
 <script>
+    /* 서브메뉴 데이터 */
     const subMenuData = {
         'account': [
+            { name: '회원정보 수정', link: "{{ url_for('auth.find_id') }}" },
+            { name: '비밀번호 변경', link: "{{ url_for('auth.find_password') }}" },
+            { name: '배송지 관리', link: '#' },
+            { name: '수신동의 설정', link: '#' },
             { name: '나의정보', link: '#' },
             { name: '멤버십', link: '#' },
             { name: '배송지관리', link: '#' },
             { name: '제품관리', link: '#' },
             { name: 'A/S이력', link: '#' }
         ],
+        'benefit': [
+            { name: '쿠폰함', link: '#' },
+            { name: '포인트 내역', link: '#' }
+        ],
         'shopping': [
-            { name: '주문/배송조회', link: '#' },
+            { name: '주문/배송조회', link: "{{ url_for('order._list') }}" },
+            { name: '취소/반품 내역', link: '#' },
             { name: '주문취소조회', link: '#' },
             { name: '결제내역조회', link: '#' },
             { name: '결제취소조회', link: '#' }
@@ -318,32 +158,33 @@
         ]
     };
 
+    /* 서브메뉴 출력 함수 */
     function showSubMenu(menuKey, element) {
         const displayArea = document.getElementById('subMenuDisplay');
         const listArea = document.getElementById('subMenuList');
-        
-        // 모든 탭 활성화 해제
+
         document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
-        
+        element.classList.add('active');
+
+        listArea.innerHTML = '';
+
         if (subMenuData[menuKey]) {
-            // 현재 클릭한 탭 활성화
-            element.classList.add('active');
-            
-            // 리스트 초기화 후 데이터 삽입
-            listArea.innerHTML = '';
             subMenuData[menuKey].forEach(item => {
                 const li = document.createElement('li');
                 li.innerHTML = `<a href="${item.link}">${item.name}</a>`;
                 listArea.appendChild(li);
             });
-            
             displayArea.style.display = 'block';
         } else {
-            // 하위 메뉴가 없는 경우 (단일 링크 메뉴) 숨김 처리
             displayArea.style.display = 'none';
         }
     }
+
+    /* 페이지 로드 시 기본 탭 선택 */
+    window.onload = function () {
+        const firstTab = document.querySelector('.nav-main .nav-item');
+        if (firstTab) showSubMenu('account', firstTab);
+    };
 </script>
 
-</body>
-</html>
+{% endblock %}
