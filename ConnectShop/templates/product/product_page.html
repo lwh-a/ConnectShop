@@ -163,6 +163,86 @@
     </div>
 </div>
 
+<section id="what-in-the-box" class="py-5 bg-white border-top">
+    <div class="container">
+        <div class="row align-items-center">
+
+            <div class="col-lg-8 text-center position-relative mb-5 mb-lg-0">
+                <h4 class="fw-bold text-start mb-5 ms-3">What's in the box</h4>
+
+                <div class="d-flex justify-content-center align-items-end gap-5">
+                    <div class="text-center">
+                        <img src="https://image.samsung.com/korea/galaxy-s24/pdp/galaxy-s24-ultra-colors-silver-s.png" alt="스마트폰" style="height: 350px;">
+                        <span class="d-block mt-3 text-muted">1</span>
+                    </div>
+                    <div class="text-center">
+                        <img src="https://image.samsung.com/korea/contents/main/ケーブル.png" alt="케이블" style="height: 300px;">
+                        <span class="d-block mt-3 text-muted">2</span>
+                    </div>
+                    <div class="text-center">
+                        <img src="https://image.samsung.com/korea/contents/main/ピン.png" alt="분리핀" style="height: 100px;">
+                        <span class="d-block mt-3 text-muted">3</span>
+                    </div>
+                </div>
+
+                <p class="text-muted mt-5 small text-start ps-3" style="line-height: 1.6;">
+                    1. 스마트폰 | 2. 데이터 케이블 | 3. 분리핀<br>
+                    ※ 갤럭시 S26와 갤럭시 S26+는 충전기 플러그가 포함되어 있지 않습니다.
+                </p>
+            </div>
+
+            <div class="col-lg-4 border rounded-4 p-4 shadow-sm bg-light">
+                <h6 class="fw-bold mb-4">최종 구매 혜택가</h6>
+
+                <div class="price-detail-box bg-white rounded-3 p-3">
+                    <div class="d-flex justify-content-between mb-2 small">
+                        <span>기준가</span>
+                        <del>1,849,000원</del>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2 small text-danger fw-medium">
+                        <span>즉시 할인</span>
+                        <span>-150,000원</span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-3 small text-danger fw-medium">
+                        <span>쿠폰 할인</span>
+                        <span>-50,000원</span>
+                    </div>
+
+                    <hr class="my-3">
+
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <span class="fw-bold">최종 혜택 적용 예상가</span>
+                        <h3 class="text-primary fw-bold mb-0">
+                            <span id="total-final-price">{{ "{:,}".format(product.price|default(1699000)) }}</span>원
+                        </h3>
+                    </div>
+
+                    <div class="benefit-box small text-muted p-2 bg-light rounded-3 mb-4">
+                        <p class="mb-1 fw-medium text-dark"><i class="bi bi-gift-fill me-1"></i> 삼성카드 결제 혜택</p>
+                        <p class="mb-0">100만원 이상 결제 시 캐시백 <span class="fw-medium text-dark">40,000원</span></p>
+                    </div>
+
+                    <div class="row g-2">
+                        <div class="col-3">
+                            <button type="button" class="btn btn-outline-dark w-100 py-3 rounded-pill">
+                                <i class="bi bi-gift"></i>
+                            </button>
+                        </div>
+                        <div class="col-9">
+                            <button type="button" class="btn btn-dark w-100 py-3 rounded-pill fw-bold">구매하기</button>
+                        </div>
+                    </div>
+
+                    <div class="text-center mt-3">
+                        <span class="text-muted" style="font-size: 0.7rem;">
+                            <i class="bi bi-truck me-1"></i> 지금 주문 시 04월 16일 부터 순차 배송됩니다.
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
 
 
 <div class="product-content-wrapper" style="margin-top: 60px;">
