@@ -24,13 +24,13 @@
             </div>
 
             <div class="item-quantity">
-                <button type="button" class="qty-btn" onclick="updateQuantity({{ item.product.id }}, 'dec', this)">−</button>
+                <button type="button" class="qty-btn mx-2" onclick="updateQuantity({{ item.product.id }}, 'dec', this)">−</button>
                 <span class="qty-num" id="qty-{{ item.product.id }}">{{ item.quantity }}</span>
-                <button type="button" class="qty-btn" onclick="updateQuantity({{ item.product.id }}, 'inc', this)">+</button>
+                <button type="button" class="qty-btn mx-2" onclick="updateQuantity({{ item.product.id }}, 'inc', this)">+</button>
             </div>
 
             <div class="item-price-group">
-                <div class="item-price">
+                <div class="item-price" id="item-total-{{ item.product.id }}">
                     {{ "{:,}".format(item.product.price * item.quantity) }}원
                 </div>
                 <a href="{{ url_for('order.delete', product_id=item.product.id) }}"
@@ -42,7 +42,7 @@
         <div class="cart-summary">
             <div class="summary-line">
                 <span>주문 금액</span>
-                <span>{{ "{:,}".format(total_price|int) }}원</span>
+                <span id="summary-subtotal">{{ "{:,}".format(total_price|int) }}원</span>
             </div>
             <div class="summary-line">
                 <span>배송비</span>
@@ -50,7 +50,7 @@
             </div>
             <div class="summary-line summary-total">
                 <span>총 결제 금액</span>
-                <span>{{ "{:,}".format(total_price|int) }}원</span>
+                <span id="summary-total">{{ "{:,}".format(total_price|int) }}원</span>
             </div>
             <a href="{{ url_for('order.checkout') }}" style="text-decoration: none;">
                 <button class="btn-checkout">결제 확인</button>
@@ -66,55 +66,7 @@
 
 {% block script %}
 <script>
-async function updateQuantity(productId, action, btnElement) {
-    // 1. 감소 버튼 클릭 시 수량이 1이면 삭제 확인창 띄우기
-    const qtySpan = document.getElementById(`qty-${productId}`);
-    let currentQty = parseInt(qtySpan.innerText);
 
-    if (action === 'dec' && currentQty <= 1) {
-        if (confirm("상품을 장바구니에서 삭제하시겠습니까?")) {
-            // 삭제 라우트로 이동 (삭제는 페이지 새로고침이 일어나는 게 명확하므로 기존 로직 활용)
-            location.href = `/order/delete/${productId}`;
-        }
-        return;
-    }
-
-    // 2. 서버에 비동기(POST) 요청 전송
-    try {
-        const response = await fetch(`/order/modify/${productId}/${action}`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            }
-        });
-
-        if (!response.ok) throw new Error('네트워크 응답에 문제가 발생했습니다.');
-
-        const data = await response.json();
-
-        if (data.success) {
-            // 3. 화면 UI 업데이트 (스크롤 이동 없이 숫자만 변경)
-
-            // 수량 업데이트
-            qtySpan.innerText = data.new_quantity;
-
-            // 개별 상품 합계 금액 업데이트
-            const row = btnElement.closest('.cart-item');
-            row.querySelector('.item-price').innerText = data.item_total + '원';
-
-            // 하단 결제 요약 영역 업데이트 (주문 금액, 총 결제 금액)
-            const summaryLines = document.querySelectorAll('.summary-line span:last-child');
-            summaryLines.forEach(span => {
-                if (span.innerText.includes('원')) {
-                    span.innerText = data.total_price + '원';
-                }
-            });
-        }
-    } catch (error) {
-        console.error('Error:', error);
-        alert('수량 변경 중 오류가 발생했습니다.');
-    }
-}
 </script>
 {% endblock %}
 {% endblock %}
