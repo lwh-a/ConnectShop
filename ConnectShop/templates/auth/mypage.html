@@ -93,19 +93,21 @@
         </div>
 
         <div class="status-bar">
-            <div class="status-item">
+            <a href="{{ url_for('order._list') }}" class="status-item" style="text-decoration: none; color: inherit; display: flex; flex-direction: column; align-items: center;">
                 <div class="icon-box">
                     <img src="{{ url_for('static', filename='images/mp/a1.png') }}" alt="주문 아이콘" width="24" height="24">
                 </div>
                 <span class="status-label">최근주문</span>
                 <span class="status-count">0</span>
-            </div>
+            </a>
             <div class="status-item">
-                <div class="icon-box">
-                    <img src="{{ url_for('static', filename='images/mp/b1.png') }}" alt="배송 아이콘" width="24" height="24">
-                </div>
-                <span class="status-label">배송중</span>
-                <span class="status-count">0</span>
+                <a href="{{ url_for('order.my_orders') }}" style="text-decoration: none; color: inherit; display: contents;">
+                    <div class="icon-box">
+                        <img src="{{ url_for('static', filename='images/mp/b1.png') }}" alt="배송 아이콘" width="24" height="24">
+                    </div>
+                    <span class="status-label">배송중</span>
+                    <span class="status-count">0</span>
+                </a>
             </div>
             <div class="status-item">
                 <div class="icon-box">
