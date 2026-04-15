@@ -21,6 +21,29 @@
         gap: 25px;
     }
 
+    /* 상단 버튼 스타일 */
+.cart-controls {
+    padding: 10px 15px;
+    border-bottom: 1px solid #ddd;
+}
+
+.btn-delete-selected, .btn-delete-soldout {
+    border: 1px solid #ddd;
+    background: white;
+    padding: 5px 12px;
+    border-radius: 6px;
+    font-size: 0.85rem;
+    transition: all 0.2s;
+}
+
+.btn-delete-selected:hover { background: #f0f0f0; }
+.btn-delete-soldout:hover { color: #dc3545; border-color: #dc3545; }
+
+/* 체크박스 정렬 */
+.item-checkbox {
+    padding: 0 15px;
+}
+
     /* 이미지 구역 */
     .item-image-box {
         width: 120px;
@@ -801,3 +824,21 @@
     background-color: #f5f5f7;
 }
 
+.node-dot {
+        position: absolute;
+        left: -24px;
+        top: 6px;
+        width: 12px;
+        height: 12px;
+        background: #d2d2d7;
+        border-radius: 50%;
+        border: 2px solid #fff;
+        z-index: 2;
+    }
+    .node-dot.active {
+        background: #0071e3;
+        box-shadow: 0 0 0 4px rgba(0, 113, 227, 0.2);
+    }
+    .timeline {
+        border-left: 2px solid #f5f5f7 !important; /* 타임라인 선 색상 */
+    }

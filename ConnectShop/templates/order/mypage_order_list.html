@@ -83,7 +83,12 @@
                                 </form>
 
                             {% elif order.status == '배송중' %}
-                                <a href="#" class="btn-figma-primary" style="text-decoration: none; background-color: #f56300;">배송조회</a>
+                                <a href="{{ url_for('order.tracking', order_id=order.id) }}"
+                                   class="btn-figma-primary"
+                                   style="background-color: #1d1d1f; color: #fff; text-decoration: none; padding: 6px 14px; border-radius: 8px; font-size: 12px;"
+                                   onclick="event.stopPropagation();">
+                                   배송 조회
+                                </a>
 
                             {% elif order.status == '배송완료' %}
                                 <form action="{{ url_for('order.confirm_purchase', order_id=order.id) }}" method="post" class="d-inline">
@@ -112,5 +117,35 @@
     {% endif %}
 </div>
 
-script
+<div class="modal fade" id="trackingModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-md modal-dialog-centered">
+        <div class="modal-content" style="border-radius: 20px; overflow: hidden; border: none;">
+            <div class="modal-header border-0 p-3 bg-light">
+                <h6 class="modal-title fw-bold">실시간 배송 조회</h6>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-0" style="height: 600px;">
+                <iframe id="trackingIframe" src="" frameborder="0" style="width: 100%; height: 100%;"></iframe>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+function openTrackingModal(url) {
+    if (!url || url === 'None') {
+        alert("운송장 정보가 등록되지 않았습니다.");
+        return;
+    }
+    const iframe = document.getElementById('trackingIframe');
+    iframe.src = url;
+
+    const trackingModal = new bootstrap.Modal(document.getElementById('trackingModal'));
+    trackingModal.show();
+}
+
+// 모달 닫을 때 주소 초기화 (메모리 절약)
+document.getElementById('trackingModal').addEventListener('hidden.bs.modal', function () {
+    document.getElementById('trackingIframe').src = '';
+});
+</script>
 {% endblock %}

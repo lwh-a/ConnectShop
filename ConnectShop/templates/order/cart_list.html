@@ -5,6 +5,7 @@
 <div class="cart-container">
     <h1 class="cart-title">장바구니</h1>
 
+    {# 재고 경고 알림창 #}
     {% if stock_warnings %}
     <div class="alert alert-danger border-0 shadow-sm mb-4" style="border-radius: 12px;">
         <div class="d-flex align-items-center gap-2 mb-2">
@@ -22,39 +23,66 @@
     {% endif %}
 
     {% if cart_list %}
-        {% for item in cart_list %}
-        <div class="cart-item">
-            <div class="item-image-box">
-                {% if item.product.image_path %}
-                    <img src="{{ url_for('static', filename=item.product.image_path) }}" alt="상품 이미지">
-                {% else %}
-                    <div class="image-placeholder">No Image</div>
-                {% endif %}
-            </div>
-
-            <div class="item-info">
-                <span class="item-name">{{ item.product.name }}</span>
-                <p class="item-description">
-                    {{ item.product.description if item.product.description else "이 제품에 대한 상세 설명이 이곳에 표시됩니다." }}
-                </p>
-            </div>
-
-            <div class="item-quantity">
-                <button type="button" class="qty-btn mx-2" onclick="updateQuantity({{ item.product.id }}, 'dec', this)">−</button>
-                <span class="qty-num" id="qty-{{ item.product.id }}">{{ item.quantity }}</span>
-                <button type="button" class="qty-btn mx-2" onclick="updateQuantity({{ item.product.id }}, 'inc', this)">+</button>
-            </div>
-
-            <div class="item-price-group">
-                <div class="item-price" id="item-total-{{ item.product.id }}">
-                    {{ "{:,}".format(item.product.price * item.quantity) }}원
+        <form action="{{ url_for('order.delete_selected') }}" method="POST" id="cart-form">
+            {# 상단 제어 바 #}
+            <div class="cart-controls d-flex justify-content-between align-items-center mb-3">
+                <div class="d-flex align-items-center">
+                    <input type="checkbox" id="check-all" class="form-check-input me-2">
+                    <label for="check-all" class="small mb-0">전체 선택</label>
                 </div>
-                <a href="{{ url_for('order.delete', product_id=item.product.id) }}"
-                   class="item-delete-link" onclick="return confirm('삭제하시겠습니까?')">삭제</a>
+                <div class="btn-group">
+                    <button type="submit" class="btn-delete-selected">선택 삭제</button>
+                    <button type="submit" formaction="{{ url_for('order.delete_soldout') }}" class="btn-delete-soldout ms-2">
+                        품절 상품 삭제
+                    </button>
+                </div>
             </div>
-        </div>
-        {% endfor %}
 
+            {# 상품 리스트 (중복 제거 및 통합) #}
+            {% for item in cart_list %}
+            <div class="cart-item">
+                <div class="item-checkbox">
+                    <input type="checkbox" name="selected_ids" value="{{ item.product.id }}" class="form-check-input item-check">
+                </div>
+
+                <div class="item-image-box">
+                    {% if item.product.image_path %}
+                        <img src="{{ url_for('static', filename=item.product.image_path) }}" alt="상품 이미지">
+                    {% else %}
+                        <div class="image-placeholder">No Image</div>
+                    {% endif %}
+                </div>
+
+                <div class="item-info">
+                    <span class="item-name">
+                        {{ item.product.name }}
+                        {% if item.product.stock <= 0 %}
+                            <span class="badge bg-danger ms-2" style="font-size: 0.6rem;">품절</span>
+                        {% endif %}
+                    </span>
+                    <p class="item-description">
+                        {{ item.product.description if item.product.description else "이 제품에 대한 상세 설명이 이곳에 표시됩니다." }}
+                    </p>
+                </div>
+
+                <div class="item-quantity">
+                    <button type="button" class="qty-btn mx-2" onclick="updateQuantity({{ item.product.id }}, 'dec', this)">−</button>
+                    <span class="qty-num" id="qty-{{ item.product.id }}">{{ item.quantity }}</span>
+                    <button type="button" class="qty-btn mx-2" onclick="updateQuantity({{ item.product.id }}, 'inc', this)">+</button>
+                </div>
+
+                <div class="item-price-group">
+                    <div class="item-price" id="item-total-{{ item.product.id }}">
+                        {{ "{:,}".format(item.product.price * item.quantity) }}원
+                    </div>
+                    <a href="{{ url_for('order.delete', product_id=item.product.id) }}"
+                       class="item-delete-link" onclick="return confirm('삭제하시겠습니까?')">삭제</a>
+                </div>
+            </div>
+            {% endfor %}
+        </form>
+
+        {# 요약 영역 #}
         <div class="cart-summary">
             <div class="summary-line">
                 <span>주문 금액</span>
@@ -83,27 +111,53 @@
 {% block script %}
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-    const checkoutBtn = document.querySelector('.btn-checkout'); // 결제하기 버튼의 클래스명
+        // 결제 버튼 재고 체크
+        const checkoutBtn = document.querySelector('.btn-checkout');
+        if (checkoutBtn) {
+            checkoutBtn.addEventListener('click', function(e) {
+                const hasWarnings = {{ 'true' if stock_warnings else 'false' }};
+                if (hasWarnings) {
+                    e.preventDefault();
+                    alert("재고가 부족한 상품이 있습니다. 수량을 수정하거나 삭제 후 다시 시도해 주세요.");
+                }
+            });
+        }
 
-    if (checkoutBtn) {
-        checkoutBtn.addEventListener('click', function(e) {
-            const hasWarnings = {{ 'true' if stock_warnings else 'false' }};
+        // 전체 선택 기능
+        const checkAll = document.getElementById('check-all');
+        const itemChecks = document.querySelectorAll('.item-check');
+        if (checkAll) {
+            checkAll.addEventListener('change', function() {
+                itemChecks.forEach(check => check.checked = this.checked);
+            });
+        }
 
-            if (hasWarnings) {
-                e.preventDefault();
-                alert("재고가 부족한 상품이 있습니다. 수량을 수정하거나 삭제 후 다시 시도해 주세요.");
-            }
+        // 개별 체크박스 -> 전체 선택 동기화
+        itemChecks.forEach(check => {
+            check.addEventListener('change', function() {
+                const checkedCount = document.querySelectorAll('.item-check:checked').length;
+                checkAll.checked = (checkedCount === itemChecks.length);
+            });
         });
-    }
-});
 
-    function checkStockBeforeUpdate(currentQty, requestedQty, availableStock) {
-    if (requestedQty > availableStock) {
-        alert("해당 상품의 재고가 부족합니다. (잔여 재고: " + availableStock + "개)");
-        return false;
-    }
-    return true;
-}
+        // 폼 제출 시 컨펌 (선택 삭제일 경우만)
+        const cartForm = document.getElementById('cart-form');
+        if (cartForm) {
+            cartForm.addEventListener('submit', function(e) {
+                if (e.submitter && e.submitter.classList.contains('btn-delete-selected')) {
+                    const checkedCount = document.querySelectorAll('.item-check:checked').length;
+                    if (checkedCount === 0) {
+                        e.preventDefault();
+                        alert("삭제할 상품을 선택해 주세요.");
+                    } else if (!confirm(checkedCount + "개의 상품을 삭제하시겠습니까?")) {
+                        e.preventDefault();
+                    }
+                }
+            });
+        }
+    });
+
+    // 기존의 updateQuantity 함수와 재고 체크 로직을 여기에 유지하세요.
 </script>
 {% endblock %}
 {% endblock %}

@@ -389,3 +389,56 @@ def confirm_purchase(order_id):
 
     return redirect(url_for('order.my_orders'))
 
+
+import requests
+
+
+@bp.route('/tracking/<int:order_id>')
+def tracking(order_id):
+    order = Order.query.get_or_404(order_id)
+
+    if g.user:
+        if order.user_id != g.user.id:
+            flash("접근 권한이 없습니다.")
+            return redirect(url_for('order.my_orders'))
+    else:
+        auth_name = session.get('guest_auth_name')
+        auth_phone = session.get('guest_auth_phone')
+
+        if not (auth_name == order.recipient and auth_phone == order.phone):
+            flash("비회원 주문 조회 후 이용 가능합니다.")
+            return redirect(url_for('order.find_guest_order'))
+
+    carrier_map = {
+        'CJ대한통운': 'kr.cjlogistics',
+        '우체국택배': 'kr.epost',
+        '한진택배': 'kr.hanjin',
+        '롯데택배': 'kr.lotteglogis',
+        '로젠택배': 'kr.logen'
+    }
+
+    c_company = order.courier_company.strip() if order.courier_company else 'CJ대한통운'
+    t_number = order.tracking_number.strip() if order.tracking_number else ''
+
+    carrier_id = carrier_map.get(order.courier_company.strip(), 'kr.cjlogistics')
+
+    api_url = f"https://tracker.delivery/v1/tracks/{carrier_id}/{order.tracking_number}"
+
+    tracking_info = None
+    if t_number:
+        try:
+            response = requests.get(api_url, timeout=5)
+            print(f"--- API 응답 확인 ---")
+            print(f"URL: {api_url}")
+            print(f"Status Code: {response.status_code}")
+
+            if response.status_code == 200:
+                tracking_info = response.json()
+                print(f"JSON Data: {tracking_info}")
+            else:
+                tracking_info = None
+        except Exception as e:
+            print(f"Error: {e}")
+            tracking_info = None
+
+    return render_template('order/tracking.html', order=order, info=tracking_info)
