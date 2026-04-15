@@ -21,3 +21,8 @@ def support():
     faq_list = FAQ.query.all()
     # 가져온 데이터를 faq_list라는 이름으로 템플릿에 넘겨줍니다.
     return render_template('support.html', faq_list=faq_list)
+
+# 회사 소개 페이지 라우트 함수
+@bp.route('/company')
+def company():
+    return render_template('company.html')
