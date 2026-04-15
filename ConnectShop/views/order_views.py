@@ -59,8 +59,7 @@ def add(product_id):
     return redirect(url_for('order._list'))
 
 
-# @ 기호가 빠졌던 부분을 수정했습니다.
-@bp.route('/modify/<int:product_id>/<string:action>', methods=['POST'])
+@bp.route('/modify/<int:product_id>/<string:action>', methods=['POST', 'GET'])
 def modify(product_id, action):
     new_quantity = 1
     unit_price = 0
@@ -68,10 +67,8 @@ def modify(product_id, action):
     if g.user:
         cart_item = Cart.query.filter_by(user_id=g.user.id, product_id=product_id).first()
         if cart_item:
-            if action == 'inc':
-                cart_item.quantity += 1
-            elif action == 'dec' and cart_item.quantity > 1:
-                cart_item.quantity -= 1
+            if action in ['inc', 'increase']: cart_item.quantity += 1
+            elif action in ['dec', 'decrease'] and cart_item.quantity > 1: cart_item.quantity -= 1
             db.session.commit()
             new_quantity = cart_item.quantity
             unit_price = cart_item.product.price
@@ -79,26 +76,27 @@ def modify(product_id, action):
         guest_cart = get_guest_cart()
         for item in guest_cart:
             if item['product_id'] == product_id:
-                if action == 'inc':
-                    item['quantity'] += 1
-                elif action == 'dec' and item['quantity'] > 1:
-                    item['quantity'] -= 1
+                if action in ['inc', 'increase']: item['quantity'] += 1
+                elif action in ['dec', 'decrease'] and item['quantity'] > 1: item['quantity'] -= 1
                 new_quantity = item['quantity']
                 product = db.session.get(Product, product_id)
                 unit_price = product.price if product else 0
                 break
         save_guest_cart(guest_cart)
 
+    # 전체 금액 계산
     cart_list = get_cart_items()
     total_price = sum(item.product.price * item.quantity for item in cart_list)
 
-    return jsonify({
-        'success': True,
-        'new_quantity': new_quantity,
-        'item_total': format(unit_price * new_quantity, ','),
-        'total_price': format(total_price, ',')
-    })
+    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        return jsonify({
+            'success': True,
+            'new_quantity': new_quantity,
+            'item_total': format(unit_price * new_quantity, ','),
+            'total_price': format(total_price, ',')
+        })
 
+    return redirect(request.referrer or url_for('order._list'))
 
 @bp.route('/delete/<int:product_id>')
 def delete(product_id):
@@ -265,35 +263,6 @@ def cancel_order(order_id):
         flash(f"주문 #{order_id}번 건이 정상적으로 취소되었습니다.")
     else:
         flash("이미 배송 중이거나 취소된 주문은 처리할 수 없습니다.")
-
-    return redirect(request.referrer or url_for('main.index'))
-
-
-@bp.route('/update_quantity/<int:product_id>/<string:action>')
-def update_quantity(product_id, action):
-    if g.user:
-        cart_item = Cart.query.filter_by(user_id=g.user.id, product_id=product_id).first()
-        if cart_item:
-            if action == 'increase':
-                cart_item.quantity += 1
-            elif action == 'decrease':
-                cart_item.quantity -= 1
-
-            if cart_item.quantity <= 0:
-                db.session.delete(cart_item)
-            db.session.commit()
-    else:
-        guest_cart = get_guest_cart()
-        for item in guest_cart:
-            if item['product_id'] == product_id:
-                if action == 'increase':
-                    item['quantity'] += 1
-                elif action == 'decrease':
-                    item['quantity'] -= 1
-                break
-
-        guest_cart = [item for item in guest_cart if item['quantity'] > 0]
-        save_guest_cart(guest_cart)
 
     return redirect(request.referrer or url_for('main.index'))
 
