@@ -1,3 +1,4 @@
+from datetime import timedelta, datetime
 from types import SimpleNamespace
 from flask import Blueprint, render_template, redirect, url_for, session, g, flash, jsonify, request
 
@@ -35,8 +36,26 @@ def get_cart_items():
 @bp.route('/list')
 def _list():
     cart_list = get_cart_items()
+    stock_warnings = []
+
+    for item in cart_list:
+        product = item.product
+        requested_qty = item.quantity
+
+        if product.stock <= 0:
+            stock_warnings.append(f"'{product.name}' 상품은 현재 품절되었습니다.")
+        elif product.stock < requested_qty:
+            stock_warnings.append(
+                f"'{product.name}' 상품의 재고가 부족합니다. "
+                f"(현재 재고: {product.stock}개 / 요청 수량: {requested_qty}개)"
+            )
+
     total_price = sum(item.product.price * item.quantity for item in cart_list)
-    return render_template('order/cart_list.html', cart_list=cart_list, total_price=total_price)
+
+    return render_template('order/cart_list.html',
+                           cart_list=cart_list,
+                           total_price=total_price,
+                           stock_warnings=stock_warnings)
 
 
 @bp.route('/add/<int:product_id>')
@@ -56,6 +75,55 @@ def add(product_id):
         else:
             guest_cart.append({'product_id': product_id, 'quantity': 1})
         save_guest_cart(guest_cart)
+    return redirect(url_for('order._list'))
+
+
+@bp.route('/delete_soldout', methods=['POST'])
+def delete_soldout():
+    cart_list = get_cart_items()
+    deleted_count = 0
+
+    if g.user:
+        for item in cart_list:
+            if item.product.stock <= 0:
+                db.session.delete(item)
+                deleted_count += 1
+        db.session.commit()
+    else:
+        new_guest_cart = [
+            item for item in get_guest_cart()
+            if db.session.get(Product, item['product_id']).stock > 0
+        ]
+        deleted_count = len(get_guest_cart()) - len(new_guest_cart)
+        save_guest_cart(new_guest_cart)
+
+    if deleted_count > 0:
+        flash(f"품절된 상품 {deleted_count}건을 삭제했습니다.")
+    else:
+        flash("삭제할 품절 상품이 없습니다.")
+
+    return redirect(url_for('order._list'))
+
+
+@bp.route('/delete_selected', methods=['POST'])
+def delete_selected():
+    selected_ids = request.form.getlist('selected_ids', type=int)
+
+    if not selected_ids:
+        flash("삭제할 상품을 선택해주세요.")
+        return redirect(url_for('order._list'))
+
+    if g.user:
+        Cart.query.filter(
+            Cart.user_id == g.user.id,
+            Cart.product_id.in_(selected_ids)
+        ).delete(synchronize_session=False)
+        db.session.commit()
+    else:
+        guest_cart = [i for i in get_guest_cart() if i['product_id'] not in selected_ids]
+        save_guest_cart(guest_cart)
+
+    flash(f"선택하신 {len(selected_ids)}개의 상품을 삭제했습니다.")
     return redirect(url_for('order._list'))
 
 
@@ -118,6 +186,11 @@ def checkout():
         flash("장바구니가 비어 있습니다.")
         return redirect(url_for('order._list'))
 
+    for item in cart_list:
+        if item.product.stock < item.quantity:
+            flash(f"상품 '{item.product.name}'의 재고가 부족합니다. (현재 재고: {item.product.stock}개)")
+            return redirect(url_for('cart.view_cart'))
+
     total_price = sum(item.product.price * item.quantity for item in cart_list)
 
     return render_template('order/checkout.html', cart_list=cart_list, total_price=total_price)
@@ -135,6 +208,11 @@ def place_order():
         flash("장바구니가 비어 있습니다.")
         return redirect(url_for('main.index'))
 
+    for item in cart_list:
+        if item.product.stock < item.quantity:
+            flash(f"죄송합니다. '{item.product.name}' 상품의 재고가 부족합니다. (남은 수량: {item.product.stock}개)")
+            return redirect(url_for('cart.view_cart'))
+
     total_price = sum(item.product.price * item.quantity for item in cart_list)
 
     new_order = Order(
@@ -143,18 +221,23 @@ def place_order():
         phone=phone,
         address=address,
         total_price=total_price,
-        payment_method=payment_method
+        payment_method=payment_method,
+        status='결제완료'
     )
     db.session.add(new_order)
 
     for item in cart_list:
         order_item = OrderItem(
-            order=new_order,  # 위에서 만든 주문서와 연결
+            order=new_order,
             product_id=item.product.id,
             quantity=item.quantity,
-            price=item.product.price  # 주문 시점의 가격 기록
+            price=item.product.price
         )
         db.session.add(order_item)
+
+        product = Product.query.get(item.product.id)
+        if product:
+            product.stock -= item.quantity
 
     if g.user:
         Cart.query.filter_by(user_id=g.user.id).delete()
@@ -165,7 +248,6 @@ def place_order():
 
     flash("주문이 성공적으로 완료되었습니다!")
     return redirect(url_for('order.order_complete', order_id=new_order.id))
-
 @bp.route('/complete/<int:order_id>')
 def order_complete(order_id):
     order = db.session.get(Order, order_id)
@@ -239,6 +321,7 @@ def order_detail(order_id):
 
     return render_template('order/order_detail.html', order=order)
 
+
 @bp.route('/order/cancel/<int:order_id>', methods=['POST'])
 def cancel_order(order_id):
     order = Order.query.get_or_404(order_id)
@@ -258,26 +341,34 @@ def cancel_order(order_id):
         return redirect(request.referrer or url_for('main.index'))
 
     if order.status == '결제완료':
+        for item in order.items:
+            product = Product.query.get(item.product_id)
+            if product:
+                product.stock += item.quantity
+
         order.status = '주문취소'
         db.session.commit()
         flash(f"주문 #{order_id}번 건이 정상적으로 취소되었습니다.")
     else:
         flash("이미 배송 중이거나 취소된 주문은 처리할 수 없습니다.")
 
-    return redirect(request.referrer or url_for('main.index'))
+    return redirect(url_for('order.order_detail', order_id=order_id))
 
 
 @bp.route('/my_cancel_list')
 @login_required
 def my_cancel_list():
+    three_months_ago = datetime.now() - timedelta(days=90)
+
     cancel_statuses = ['주문취소', '취소신청', '반품신청', '반품수거중', '반품완료']
 
-    cancel_orders = Order.query.filter(
+    order_list = Order.query.filter(
         Order.user_id == g.user.id,
-        Order.status.in_(cancel_statuses)
+        Order.status.in_(cancel_statuses),
+        Order.order_date >= three_months_ago
     ).order_by(Order.order_date.desc()).all()
 
-    return render_template('order/mypage_cancel_list.html', order_list=cancel_orders)
+    return render_template('order/mypage_cancel_list.html', order_list=order_list)
 
 
 @bp.route('/confirm_purchase/<int:order_id>', methods=['POST'])
@@ -298,3 +389,56 @@ def confirm_purchase(order_id):
 
     return redirect(url_for('order.my_orders'))
 
+
+import requests
+
+
+@bp.route('/tracking/<int:order_id>')
+def tracking(order_id):
+    order = Order.query.get_or_404(order_id)
+
+    if g.user:
+        if order.user_id != g.user.id:
+            flash("접근 권한이 없습니다.")
+            return redirect(url_for('order.my_orders'))
+    else:
+        auth_name = session.get('guest_auth_name')
+        auth_phone = session.get('guest_auth_phone')
+
+        if not (auth_name == order.recipient and auth_phone == order.phone):
+            flash("비회원 주문 조회 후 이용 가능합니다.")
+            return redirect(url_for('order.find_guest_order'))
+
+    carrier_map = {
+        'CJ대한통운': 'kr.cjlogistics',
+        '우체국택배': 'kr.epost',
+        '한진택배': 'kr.hanjin',
+        '롯데택배': 'kr.lotteglogis',
+        '로젠택배': 'kr.logen'
+    }
+
+    c_company = order.courier_company.strip() if order.courier_company else 'CJ대한통운'
+    t_number = order.tracking_number.strip() if order.tracking_number else ''
+
+    carrier_id = carrier_map.get(order.courier_company.strip(), 'kr.cjlogistics')
+
+    api_url = f"https://tracker.delivery/v1/tracks/{carrier_id}/{order.tracking_number}"
+
+    tracking_info = None
+    if t_number:
+        try:
+            response = requests.get(api_url, timeout=5)
+            print(f"--- API 응답 확인 ---")
+            print(f"URL: {api_url}")
+            print(f"Status Code: {response.status_code}")
+
+            if response.status_code == 200:
+                tracking_info = response.json()
+                print(f"JSON Data: {tracking_info}")
+            else:
+                tracking_info = None
+        except Exception as e:
+            print(f"Error: {e}")
+            tracking_info = None
+
+    return render_template('order/tracking.html', order=order, info=tracking_info)

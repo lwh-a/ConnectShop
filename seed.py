@@ -122,14 +122,16 @@ with app.app_context():
 
     # [팀원 1] Order 생성
     order1 = Order(user_id=u1.id, recipient='test01', phone='010-1234-5678', address='경기 성남시 분당구 판교역로 166',
-                   total_price=1799000, payment_method='transfer', status='배송중')
+                   total_price=1799000, payment_method='무통장입금', status='배송중',courier_company='한진택배',tracking_number='536691845023')
     order2 = Order(user_id=u1.id, recipient='test01', phone='010-1234-5678', address='경기 성남시 분당구 판교역로 166',
                    total_price=1600000, payment_method='무통장입금', status='구매확정')
     order3 = Order(user_id=None, recipient='test01', phone='010-1234-5678', address='경기 성남시 분당구 판교역로 166',
-                   total_price=1600000, payment_method='무통장입금', status='결제완료')
+                   total_price=1600000, payment_method='무통장입금', status='배송중',courier_company='CJ대한통운',tracking_number='511704834795')
     order4 = Order(user_id=u1.id, recipient='test01', phone='010-1234-5678', address='경기 성남시 분당구 판교역로 166',
                    total_price=1600000, payment_method='무통장입금', status='주문취소')
-    db.session.add_all([order1, order2, order3, order4])
+    order5 = Order(user_id=None, recipient='test01', phone='010-1234-5678', address='경기 성남시 분당구 판교역로 166',
+                   total_price=1600000, payment_method='무통장입금', status='결제완료')
+    db.session.add_all([order1, order2, order3, order4, order5])
 
     # 🔥 2차 커밋 (멤버십, 쿠폰, 그리고 영수증 번호가 발급됩니다)
     db.session.commit()
@@ -145,8 +147,9 @@ with app.app_context():
     oi3 = OrderItem(order_id=order2.id, product_id=p1.id, quantity=1, price=1600000)
     oi4 = OrderItem(order_id=order3.id, product_id=p1.id, quantity=1, price=1600000)
     oi5 = OrderItem(order_id=order4.id, product_id=p1.id, quantity=1, price=1600000)
+    oi6 = OrderItem(order_id=order5.id, product_id=p1.id, quantity=1, price=1600000)
 
-    db.session.add_all([oi1, oi2, oi3, oi4, oi5])
+    db.session.add_all([oi1, oi2, oi3, oi4, oi5, oi6])
 
     # 🔥 최종 3차 커밋 (상세 내역 확정)
     db.session.commit()

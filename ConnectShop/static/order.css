@@ -21,6 +21,29 @@
         gap: 25px;
     }
 
+    /* 상단 버튼 스타일 */
+.cart-controls {
+    padding: 10px 15px;
+    border-bottom: 1px solid #ddd;
+}
+
+.btn-delete-selected, .btn-delete-soldout {
+    border: 1px solid #ddd;
+    background: white;
+    padding: 5px 12px;
+    border-radius: 6px;
+    font-size: 0.85rem;
+    transition: all 0.2s;
+}
+
+.btn-delete-selected:hover { background: #f0f0f0; }
+.btn-delete-soldout:hover { color: #dc3545; border-color: #dc3545; }
+
+/* 체크박스 정렬 */
+.item-checkbox {
+    padding: 0 15px;
+}
+
     /* 이미지 구역 */
     .item-image-box {
         width: 120px;
@@ -204,12 +227,11 @@
     text-align: center; /* 전체 중앙 정렬 */
 }
 
-.order-header {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    text-align: center;
-    margin-bottom: 40px;
+.complete-container .order-header {
+    display: block !important;
+    text-align: center !important;
+    padding-bottom: 30px;
+    border-bottom: none;
 }
 
 .order-header .status-badge {
@@ -231,6 +253,13 @@
     margin-bottom: 25px; /* 아이콘과 텍스트 사이 간격 */
 }
 
+.complete-container .success-icon {
+    margin: 0 auto 25px auto !important;
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+}
+
 .order-header h1 {
     font-size: 32px;
     font-weight: 700;
@@ -243,6 +272,21 @@
     color: #86868b;
     font-size: 18px;
     margin: 0;
+}
+
+.complete-container .header-left,
+.complete-container .header-right {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 100% !important;
+    margin: 0 !important;
+    gap: 10px;
+}
+
+.complete-container .success-icon {
+    margin-bottom: 20px;
 }
 
 /* 상세 정보 카드 */
@@ -340,15 +384,15 @@
     align-items: stretch;
 }
 
-.order-header {
+.history-container .order-header {
     display: flex !important;
-    flex-direction: row !important; /* 가로 방향 고정 */
-    justify-content: space-between !important; /* 좌우 끝 밀기 */
+    justify-content: space-between !important;
     align-items: center !important;
-    width: 100% !important; /* 🌟 헤더가 부모 너비를 꽉 채우도록 함 */
+    width: 100% !important;
     padding-bottom: 20px;
     border-bottom: 1px solid #d2d2d7;
     margin-bottom: 10px;
+    text-align: left !important;
 }
 
 .header-left {
@@ -483,7 +527,51 @@
 .status-node { flex: 1; text-align: center; }
 .node-label { display: block; font-size: 13px; color: #86868b; margin-bottom: 6px; }
 .node-count { font-size: 20px; font-weight: 700; color: #1d1d1f; }
-.status-node.active .node-count { color: #0071e3; }
+
+.figma-header-group {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+}
+
+.figma-title {
+    margin-bottom: 0 !important;
+    font-size: 24px;
+    font-weight: 700;
+    color: #1d1d1f;
+}
+
+.btn-back-box {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 14px;
+    background-color: #f5f5f7;
+    color: #1d1d1f;
+    text-decoration: none;
+    border-radius: 10px;
+    font-size: 13px;
+    font-weight: 500;
+    transition: all 0.2s ease;
+}
+
+.btn-back-box:hover {
+    background-color: #e8e8ed;
+    color: #0071e3;
+}
+
+@media (max-width: 576px) {
+    .figma-header-group {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 15px;
+    }
+    .back-nav-wrapper {
+        width: 100%;
+        text-align: right;
+    }
+}
 
 /* 주문 카드 메인 (피그마 와이어프레임 규격) */
 .order-card-figma {
@@ -736,3 +824,21 @@
     background-color: #f5f5f7;
 }
 
+.node-dot {
+        position: absolute;
+        left: -24px;
+        top: 6px;
+        width: 12px;
+        height: 12px;
+        background: #d2d2d7;
+        border-radius: 50%;
+        border: 2px solid #fff;
+        z-index: 2;
+    }
+    .node-dot.active {
+        background: #0071e3;
+        box-shadow: 0 0 0 4px rgba(0, 113, 227, 0.2);
+    }
+    .timeline {
+        border-left: 2px solid #f5f5f7 !important; /* 타임라인 선 색상 */
+    }
