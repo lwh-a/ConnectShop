@@ -6,7 +6,6 @@
 <div class="mypage-header-wrap">
     <div class="my-info-title">마이페이지</div>
 
-    <!-- 상단 네비게이션 -->
     <nav class="nav-container1">
         <ul class="nav-main">
             <li class="nav-item" onclick="showSubMenu('account', this)">나의 계정정보</li>
@@ -19,12 +18,10 @@
         </ul>
     </nav>
 
-    <!-- 서브메뉴 영역 -->
     <div id="subMenuDisplay" class="sub-menu-display">
         <ul id="subMenuList" class="sub-menu-list"></ul>
     </div>
 </div>
-
 
 <div class="mypage-body-wrap">
     <div class="mypage-container">
@@ -43,7 +40,7 @@
                     </div>
 
                     {% if g.user %}
-                    <div class="m-user-join-date">가입일 · {{ g.user.join_date.strftime('%Y.%m.%d') }}</div>
+                    <div class="m-user-join-date">가입일 · {{ g.user.join_date.strftime('%Y.%m.%d') if g.user.join_date else '-' }}</div>
                     <div class="m-action-links">
                         <a href="{{ url_for('auth.mypage') }}" class="m-edit-link">정보수정 ></a>
                         <span class="m-divider">|</span>
@@ -56,13 +53,15 @@
                     {% endif %}
                 </div>
             </div>
+
             <div class="m-grid-item m-data-box">
                 <div class="m-data-label">보증 서비스</div>
                 <div class="m-data-value">
-                    {% if g.user and g.user.benefit and g.user.benefit.has_apple_care %}
-                    <span style="color: #007bff;">Care+ 활성</span>
+                    {# g.user가 있고 멤버십이 활성화된 경우만 표시 #}
+                    {% if g.user and g.user.is_membership %}
+                        <span style="color: #007bff; font-weight: bold;">Care+ 활성</span>
                     {% else %}
-                    <span style="color: #868e96; font-size: 0.9rem;">미가입</span>
+                        <span style="color: #868e96; font-size: 0.9rem;">미가입</span>
                     {% endif %}
                 </div>
             </div>
@@ -70,20 +69,29 @@
             <div class="m-grid-item m-data-box">
                 <div class="m-data-label">배송 혜택</div>
                 <div class="m-data-value">
-                    {% if g.user and g.user.benefit and g.user.benefit.free_shipping %}
-                    <span style="color: #007bff;">무제한 무료</span>
+                    {% if g.user and g.user.is_membership %}
+                        <span style="color: #007bff; font-weight: bold;">무제한 무료</span>
                     {% else %}
-                    <span style="font-size: 0.9rem; color: #212529;">일반 배송</span>
+                        <span style="font-size: 0.9rem; color: #212529;">일반 배송</span>
                     {% endif %}
                 </div>
             </div>
 
-            <div class="m-grid-item m-data-box" onclick="location.href='#coupon'">
-                <div class="m-data-label">나의 쿠폰</div>
-                <div class="m-data-value">0<span>개</span></div>
+            <div class="m-grid-item m-data-box coupon-info-box">
+                <div class="m-data-label">보유 쿠폰</div>
+                <div class="m-data-value">
+                    <strong style="color:red;">{{ coupon_count or 0 }}</strong> 장
+                    <div style="font-size: 11px; margin-top: 4px;">
+                        {% if g.user and g.user.is_membership %}
+                        <span style="color:#007bff;">(멤버십 전용 혜택 포함)</span>
+                        {% else %}
+                        <span style="color:#999;">(기본 쿠폰 제공)</span>
+                        {% endif %}
+                    </div>
+                </div>
             </div>
         </div>
-        <!-- 상태바 -->
+
         <div class="status-bar">
             <div class="status-item">
                 <div class="icon-box"></div>
@@ -112,7 +120,6 @@
             </div>
         </div>
 
-        <!-- 제품 관리 -->
         <section>
             <div class="section-title">
                 <h3>나의 제품 관리</h3>
@@ -124,7 +131,6 @@
             </div>
         </section>
 
-        <!-- 추천 제품 -->
         <section>
             <div class="section-title">
                 <h3>{{ g.user.username if g.user else '고객' }}님을 위한 맞춤 제품</h3>
@@ -149,31 +155,27 @@
             </div>
         </section>
     </div>
-
 </div>
-
-
 
 <script>
     /* 서브메뉴 데이터 */
     const subMenuData = {
         'account': [
-            { name: '회원정보 수정', link: "{{ url_for('auth.find_id') }}" },
-            { name: '배송지 관리', link: '#' },
+            { name: '회원정보 수정', link: "{{ url_for('auth.find_id') }}" }, // 쉼표 오류 수정됨
             { name: '수신동의 설정', link: '#' },
             { name: '나의정보', link: '#' },
-            { name: '멤버십(Test On/Off)', link: "javascript:toggleMembershipTest()" },
+            { name: '멤버십', link: '#' },
             { name: '배송지관리', link: '#' },
             { name: '제품관리', link: '#' },
             { name: 'A/S이력', link: '#' }
         ],
         'benefit': [
-            { name: '쿠폰함', link: '#' },
+            { name: '쿠폰함', link: "{{ url_for('auth.coupons') }}" },
             { name: '포인트 내역', link: '#' }
         ],
         'shopping': [
-            { name: '주문/배송조회', link: "{{ url_for('order.my_orders') }}" },
-            { name: '취소/반품 내역', link: '{{ url_for('order.my_cancel_list') }}' },
+            { name: '주문/배송조회', link: "{{ url_for('order.my_orders') if url_for('order.my_orders') else '#' }}" },
+            { name: '취소/반품 내역', link: '#' },
             { name: '주문취소조회', link: '#' },
             { name: '결제내역조회', link: '#' },
             { name: '결제취소조회', link: '#' }
@@ -184,11 +186,10 @@
         ],
         'coupon': [
             { name: '쿠폰받기', link: '#' },
-            { name: '보유쿠폰', link: '#' }
+            { name: '보유쿠폰', link: "{{ url_for('auth.coupons') }}" }
         ]
     };
 
-    /* 서브메뉴 출력 함수 */
     function showSubMenu(menuKey, element) {
         const displayArea = document.getElementById('subMenuDisplay');
         const listArea = document.getElementById('subMenuList');
@@ -210,44 +211,23 @@
         }
     }
 
-    /* 페이지 로드 시 기본 탭 선택 */
     window.onload = function () {
         const firstTab = document.querySelector('.nav-main .nav-item');
         if (firstTab) showSubMenu('account', firstTab);
     };
 
-    /* 멤버십 토글 테스트 함수 추가 */
-    function toggleMembershipTest() {
-        if (!confirm("멤버십 상태를 변경하시겠습니까? (테스트용)")) return;
-
-        fetch('/auth/toggle_membership', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' }
-        })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    alert(data.message);
-                    location.reload(); // 화면의 보증 서비스/배송 혜택 UI 업데이트를 위해 새로고침
-                } else {
-                    alert("오류: " + data.message);
-                }
-            })
-            .catch(error => console.error('Error:', error));
-    }
     function confirmWithdraw(event, isMembership) {
-        event.preventDefault(); // 링크 이동 방지
-        event.stopPropagation(); // 부모 div의 클릭 이벤트 방지
+        event.preventDefault();
+        event.stopPropagation();
 
         let message = "정말로 탈퇴하시겠습니까?";
-
-        // 멤버십 가입자인 경우 경고 문구 추가 [cite: 14, 15]
         if (isMembership) {
             message = "현재 멤버십 이용 중입니다.\n탈퇴 시 애플케어 보증 및 무료 배송 혜택이 즉시 소멸됩니다.\n\n정말로 탈퇴하시겠습니까?";
         }
 
         if (confirm(message)) {
-            document.getElementById('withdrawForm').submit();
+            const form = document.getElementById('withdrawForm');
+            if (form) form.submit();
         }
     }
 </script>
