@@ -151,7 +151,7 @@
               <div class="my-product-grid">
                 {% for product in confirmed_products %}
                   <div class="my-product-item">
-                    <a href="{{ url_for('product.detail', product_id=product.id) }}">
+                    <a href="{{ url_for('product.page', product_id=product.id) }}">
                       <img class="my-product-img"
                            src="{{ url_for('static', filename='images/menu/' ~ product.image_path) }}"
                            alt="{{ product.name }}">
