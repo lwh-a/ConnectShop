@@ -73,6 +73,24 @@ class Product(db.Model):
     description = db.Column(db.Text, nullable=True)
     # image_path: 화면에 띄워줄 상품 사진 파일의 위치(경로)입니다.
     image_path = db.Column(db.String(200), nullable=True)
+    # 구성품 이미지 경로 (예: 's26_box.jpg')
+    box_image_path = db.Column(db.String(200), nullable=True)
+    # 구성품 설명 문구 (예: '1. 스마트폰 | 2. 데이터 케이블...')
+    box_description = db.Column(db.Text, nullable=True)
+    # 옵션 데이터를 가져오기 위한 연결고리 (1:N 관계)
+    options = db.relationship('ProductOption', backref='product', lazy=True)
+
+
+class ProductOption(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    # product.id와 연결되는 외래키
+    product_id = db.Column(db.Integer, db.ForeignKey('product.id'), nullable=False)
+
+    otype = db.Column(db.String(50))  # '용량', '색상', '모델', '칩셋' 등
+    oname = db.Column(db.String(100))  # '512GB', '티타늄 블랙' 등 이름
+    add_price = db.Column(db.Integer, default=0)  # 기준가에 더할 금액
+    image_variant = db.Column(db.String(200))  # 옵션 클릭 시 바뀔 이미지 파일명
+    color_code = db.Column(db.String(20))  # 색상 버튼용 HEX 코드 (예: #000000)
 # =========================================================
 # [팀원 3: 박예인님 담당] 장바구니 및 주문/결제 그룹
 # =========================================================

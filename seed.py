@@ -1,5 +1,5 @@
 from ConnectShop import create_app, db
-from ConnectShop.models import User, MembershipBenefit, Coupon, Product, Cart, Order, OrderItem, Review, FAQ
+from ConnectShop.models import User, MembershipBenefit, Coupon, Product, Cart, Order, OrderItem, Review, FAQ, ProductOption
 # 🔥 비밀번호 암호화를 위한 도구 추가
 from werkzeug.security import generate_password_hash
 
@@ -14,6 +14,7 @@ with app.app_context():
     Cart.query.delete()
     Coupon.query.delete()
     MembershipBenefit.query.delete()
+    ProductOption.query.delete()
     Product.query.delete()
     User.query.delete()
     FAQ.query.delete()
@@ -80,16 +81,74 @@ with app.app_context():
 
     # [팀원 1] Product 생성
     p1 = Product(name='갤럭시 S26 울트라', price=1600000, category='스마트폰', brand='삼성', stock=10, description='테스트용 상품 1',
-                 image_path='phone1.jpg')
+                 image_path='phone1.jpg', box_image_path='images/phone1_box_all.webp',
+                 box_description='1. 스마트폰 | 2. 데이터 케이블 | 3. 분리핀<br>※ 갤럭시 S26 시리즈는 충전기가 포함되지 않습니다.')
     p2 = Product(name='애플 에어팟', price=199000, category='무선이어폰', brand='애플', stock=20, description='테스트용 상품 2',
-                 image_path='ear2.jpg')
+                 image_path='ear2.jpg',)
     p3 = Product(name='소니 WH 헤드폰', price=459000, category='헤드폰', brand='소니', stock=15, description='테스트용 상품 3',
                  image_path='headphone1.jpg')
     p4 = Product(name='맥북 에어 M3', price=1590000, category='노트북', brand='애플', stock=5, description='테스트용 상품 4',
                  image_path='notebook2.jpg')
     p5 = Product(name='갤럭시 워치 8', price=350000, category='스마트워치', brand='삼성', stock=30, description='테스트용 상품 5',
-                 image_path='watch1.jpg')
+                 image_path='watch1.jpg',box_image_path='images/watch1_box_all.avif',
+                box_description ='1. 갤럭시 워치8 | 2. 무선 충전기 | 3. 간단 사용 설명서<br>※ 구성 요소는 국가 및 컬러에 따라 다를 수 있습니다.')
     db.session.add_all([p1, p2, p3, p4, p5])
+    db.session.commit()  # ID 발급을 위해 먼저 커밋합니다.
+
+    print("📦 상품 기본 데이터 생성 완료, 옵션 매칭 시작...")
+
+    # 2. 제품별 상세 옵션(ProductOption) 생성
+    options = [
+        # --- 갤럭시 S26 울트라 (p1) ---
+        ProductOption(product_id=p1.id, otype='모델', oname='갤럭시 S26 울트라 (174.9mm)', add_price=0),
+        ProductOption(product_id=p1.id, otype='용량', oname='256GB ㅣ 12GB', add_price=0),
+        ProductOption(product_id=p1.id, otype='용량', oname='512GB ㅣ 12GB', add_price=253000),
+        ProductOption(product_id=p1.id, otype='용량', oname='1TB ㅣ 16GB', add_price=748000),
+        ProductOption(product_id=p1.id, otype='색상', oname='핑크 골드', color_code='#F1DDCF',
+                      image_variant='phone1_pink.jpg'),
+        ProductOption(product_id=p1.id, otype='색상', oname='실버 쉐도우', color_code='#C0C0C0',
+                      image_variant='phone1_silver.jpg'),
+        ProductOption(product_id=p1.id, otype='색상', oname='블랙', color_code='#000000', image_variant='phone1_black.jpg'),
+        ProductOption(product_id=p1.id, otype='색상', oname='블루', color_code='#A2B5CD', image_variant='phone1_blue.jpg'),
+
+        # --- 애플 에어팟 (p2) - 케이스 옵션 예시 ---
+        ProductOption(product_id=p2.id, otype='모델', oname='유선 충전 모델', add_price=0),
+        ProductOption(product_id=p2.id, otype='모델', oname='MagSafe 충전 모델', add_price=50000),
+
+        # --- 소니 WH 헤드폰 (p3) ---
+        ProductOption(product_id=p3.id, otype='색상', oname='플래티넘 실버', color_code='#E5E5E5',
+                      image_variant='headphone1_silver.jpg'),
+        ProductOption(product_id=p3.id, otype='색상', oname='블랙', color_code='#1A1A1A',
+                      image_variant='headphone1_black.jpg'),
+        ProductOption(product_id=p3.id, otype='색상', oname='미드나잇 블루', color_code='#191970',
+                      image_variant='headphone1_blue.jpg'),
+
+        # --- 맥북 에어 M3 (p4) ---
+        ProductOption(product_id=p4.id, otype='모델', oname='13 모델', add_price=0),
+        ProductOption(product_id=p4.id, otype='모델', oname='15 모델', add_price=300000),
+        ProductOption(product_id=p4.id, otype='색상', oname='스타라이트', color_code='#F0EAD6',
+                      image_variant='notebook2_starlight.jpg'),
+        ProductOption(product_id=p4.id, otype='색상', oname='미드나잇', color_code='#2C3539',
+                      image_variant='notebook2_midnight.jpg'),
+        ProductOption(product_id=p4.id, otype='칩셋', oname='8코어 GPU', add_price=0),
+        ProductOption(product_id=p4.id, otype='칩셋', oname='10코어 GPU', add_price=150000),
+
+        # --- 갤럭시 워치 8 (p5) ---
+        ProductOption(product_id=p5.id, otype='모델', oname='갤럭시 워치8', add_price=0),
+        ProductOption(product_id=p5.id, otype='모델', oname='갤럭시 워치8 클래식', add_price=100000),
+        ProductOption(product_id=p5.id, otype='크기', oname='40mm', add_price=0),
+        ProductOption(product_id=p5.id, otype='크기', oname='44mm', add_price=50000),
+        ProductOption(product_id=p5.id, otype='색상', oname='그라파이트', color_code='#383838',
+                      image_variant='watch1_graphite.jpg'),
+        ProductOption(product_id=p5.id, otype='색상', oname='실버', color_code='#C0C0C0',
+                      image_variant='watch1_silver.jpg'),
+    ]
+
+    # 3. 옵션 일괄 추가 및 최종 커밋
+    db.session.add_all(options)
+    db.session.commit()
+
+    print("✅ 모든 상품 옵션 데이터 통합 완료!")
 
     # [팀원 4 - 이강토] FAQ 생성
     faq1 = FAQ(category='배송', question='배송은 얼마나 걸리나요?', answer='결제 완료 후 영업일 기준 1~3일 이내에 출고됩니다.')
