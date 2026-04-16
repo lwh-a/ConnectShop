@@ -119,6 +119,13 @@ class Order(db.Model):
     payment_method = db.Column(db.String(50), nullable=False) # 결제 수단 (카드, 무통장 등)
     status = db.Column(db.String(50), default='결제완료') # 배송 상태 (결제완료 -> 배송중 -> 배송완료)
     order_date = db.Column(db.DateTime, default=datetime.utcnow) # 주문한 시간
+    tracking_number = db.Column(db.String(50), nullable=True) # 운송장 번호 (결제 완료 직후엔 없으므로 빈칸 허용)
+    courier_company = db.Column(db.String(50), nullable=True) # 택배사 (예: CJ대한통운, 우체국)
+    current_location = db.Column(db.String(100), default='상품 준비 중')
+    delivery_message = db.Column(db.String(200), default='주문이 확인되어 배송을 준비하고 있습니다.')
+    last_updated = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+
 
 # 7. 주문 상세(OrderItem) 테이블: 영수증 안에 적힌 구체적인 상품 내역입니다. (한 번 주문에 여러 개를 살 수 있으니까요)
 class OrderItem(db.Model):
