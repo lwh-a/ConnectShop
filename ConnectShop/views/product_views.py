@@ -6,7 +6,7 @@ bp = Blueprint('product', __name__, url_prefix='/product')
 
 
 @bp.route('/page/<int:product_id>/')
-def detail(product_id):
+def page(product_id):
     # 1. DB에서 해당 ID의 상품을 가져옵니다.
     # get_or_404는 상품이 없으면 알아서 404 에러 페이지를 띄워줍니다.
     product = Product.query.get_or_404(product_id)
