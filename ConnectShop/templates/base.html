@@ -145,7 +145,6 @@
         transform: translateY(0);
     }
 
-/* <<<<<<< HEAD */
 .cart-brief-item {
     display: flex;
     justify-content: space-between;
@@ -180,9 +179,8 @@
     border-color: #86868b;
     color: #0071e3;
 }
-/* ======= */
 
-    /* 푸터 링크 스타일: 평소에는 조용히, 호버 시에는 확실하게 - 팀장님 작업 */
+    /* 푸터 링크 스타일: 평소에는 조용히, 호버 시에는 확실하게 */
     .footer-link {
         color: #6c757d !important; /* Bootstrap text-muted 색상 고정 */
         transition: all 0.2s ease;
@@ -193,7 +191,17 @@
         text-decoration: underline !important; /* 밑줄 추가 */
         transform: translateY(-1px); /* 아주 살짝 위로 뜨는 느낌 */
     }
->>>>>>> 886e0ac49336dd197163ce00cd766d750a54ec9e
+
+    /* 🌟 추가: 메가메뉴 '더 보기' 링크 스타일 */
+    .mega-view-all {
+        color: #555;
+        transition: color 0.2s, transform 0.2s;
+        font-size: 0.95rem;
+    }
+    .mega-view-all:hover {
+        color: #007bff !important; /* 마우스 올리면 파란색으로 */
+        transform: translateX(3px); /* 마우스 올리면 화살표 방향으로 살짝 이동 */
+    }
 </style>
 </head>
 
@@ -211,37 +219,33 @@
                 </button>
 
                 <div class="collapse navbar-collapse justify-content-center" id="mainNavbar">
-                    <ul class="navbar-nav">
-
-                        <li class="nav-item dropdown">
+                    <ul class="navbar-nav align-items-center"> <li class="nav-item dropdown">
                             <a class="nav-link" href="#" role="button" aria-expanded="false">스마트폰</a>
                             <div class="dropdown-menu mega-menu shadow-sm">
-                                <div class="d-flex gap-4 justify-content-center">
+                                <div class="d-flex gap-4 justify-content-center align-items-center">
                                     <a href="#" class="mega-item d-flex flex-column align-items-center">
-                                        <img src="{{ url_for('static', filename='images/menu/phone1.jpg') }}"
-                                            alt="삼성 갤럭시" class="mega-img">
+                                        <img src="{{ url_for('static', filename='images/menu/phone1.jpg') }}" alt="삼성 갤럭시" class="mega-img">
                                         <span class="mega-text">삼성 갤럭시</span>
                                     </a>
                                     <a href="#" class="mega-item d-flex flex-column align-items-center">
-                                        <img src="{{ url_for('static', filename='images/menu/phone2.jpg') }}"
-                                            alt="애플 아이폰" class="mega-img">
+                                        <img src="{{ url_for('static', filename='images/menu/phone2.jpg') }}" alt="애플 아이폰" class="mega-img">
                                         <span class="mega-text">애플 아이폰</span>
                                     </a>
                                     <a href="#" class="mega-item d-flex flex-column align-items-center">
-                                        <img src="{{ url_for('static', filename='images/menu/phone3.jpg') }}"
-                                            alt="샤오미 샤오미" class="mega-img">
+                                        <img src="{{ url_for('static', filename='images/menu/phone3.jpg') }}" alt="샤오미 샤오미" class="mega-img">
                                         <span class="mega-text">샤오미 샤오미</span>
                                     </a>
                                     <a href="#" class="mega-item d-flex flex-column align-items-center">
-                                        <img src="{{ url_for('static', filename='images/menu/phone4.jpg') }}"
-                                            alt="구글 픽셀" class="mega-img">
+                                        <img src="{{ url_for('static', filename='images/menu/phone4.jpg') }}" alt="구글 픽셀" class="mega-img">
                                         <span class="mega-text">구글 픽셀</span>
                                     </a>
                                     <a href="#" class="mega-item d-flex flex-column align-items-center">
-                                        <img src="{{ url_for('static', filename='images/menu/phone5.jpg') }}"
-                                            alt="모토로라 엣지" class="mega-img">
+                                        <img src="{{ url_for('static', filename='images/menu/phone5.jpg') }}" alt="모토로라 엣지" class="mega-img">
                                         <span class="mega-text">모토로라 엣지</span>
                                     </a>
+                                    <div class="ms-3 ps-4 border-start" style="height: 50px; display: flex; align-items: center;">
+                                        <a href="#" class="text-decoration-none fw-bold text-nowrap mega-view-all">더 많은 스마트폰 보러가기 <i class="bi bi-chevron-right"></i></a>
+                                    </div>
                                 </div>
                             </div>
                         </li>
@@ -249,32 +253,30 @@
                         <li class="nav-item dropdown">
                             <a class="nav-link" href="#" role="button" aria-expanded="false">무선이어폰</a>
                             <div class="dropdown-menu mega-menu shadow-sm">
-                                <div class="d-flex gap-4 justify-content-center">
+                                <div class="d-flex gap-4 justify-content-center align-items-center">
                                     <a href="#" class="mega-item d-flex flex-column align-items-center">
-                                        <img src="{{ url_for('static', filename='images/menu/ear1.jpg') }}"
-                                            alt="삼성 갤럭시 버즈" class="mega-img">
+                                        <img src="{{ url_for('static', filename='images/menu/ear1.jpg') }}" alt="삼성 갤럭시 버즈" class="mega-img">
                                         <span class="mega-text">삼성 갤럭시 버즈</span>
                                     </a>
                                     <a href="#" class="mega-item d-flex flex-column align-items-center">
-                                        <img src="{{ url_for('static', filename='images/menu/ear2.jpg') }}" alt="애플 에어팟"
-                                            class="mega-img">
+                                        <img src="{{ url_for('static', filename='images/menu/ear2.jpg') }}" alt="애플 에어팟" class="mega-img">
                                         <span class="mega-text">애플 에어팟</span>
                                     </a>
                                     <a href="#" class="mega-item d-flex flex-column align-items-center">
-                                        <img src="{{ url_for('static', filename='images/menu/ear3.jpg') }}" alt="샤오미 버즈"
-                                            class="mega-img">
+                                        <img src="{{ url_for('static', filename='images/menu/ear3.jpg') }}" alt="샤오미 버즈" class="mega-img">
                                         <span class="mega-text">샤오미 버즈</span>
                                     </a>
                                     <a href="#" class="mega-item d-flex flex-column align-items-center">
-                                        <img src="{{ url_for('static', filename='images/menu/ear4.jpg') }}" alt="샥즈 오픈핏"
-                                            class="mega-img">
+                                        <img src="{{ url_for('static', filename='images/menu/ear4.jpg') }}" alt="샥즈 오픈핏" class="mega-img">
                                         <span class="mega-text">샥즈 오픈핏</span>
                                     </a>
                                     <a href="#" class="mega-item d-flex flex-column align-items-center">
-                                        <img src="{{ url_for('static', filename='images/menu/ear5.jpg') }}" alt="소니 WF"
-                                            class="mega-img">
+                                        <img src="{{ url_for('static', filename='images/menu/ear5.jpg') }}" alt="소니 WF" class="mega-img">
                                         <span class="mega-text">소니 WF</span>
                                     </a>
+                                    <div class="ms-3 ps-4 border-start" style="height: 50px; display: flex; align-items: center;">
+                                        <a href="#" class="text-decoration-none fw-bold text-nowrap mega-view-all">더 많은 무선이어폰 보러가기 <i class="bi bi-chevron-right"></i></a>
+                                    </div>
                                 </div>
                             </div>
                         </li>
@@ -282,32 +284,30 @@
                         <li class="nav-item dropdown">
                             <a class="nav-link" href="#" role="button" aria-expanded="false">스마트워치</a>
                             <div class="dropdown-menu mega-menu shadow-sm">
-                                <div class="d-flex gap-4 justify-content-center">
+                                <div class="d-flex gap-4 justify-content-center align-items-center">
                                     <a href="#" class="mega-item d-flex flex-column align-items-center">
-                                        <img src="{{ url_for('static', filename='images/menu/watch1.jpg') }}"
-                                            alt="삼성 갤럭시 워치" class="mega-img">
+                                        <img src="{{ url_for('static', filename='images/menu/watch1.jpg') }}" alt="삼성 갤럭시 워치" class="mega-img">
                                         <span class="mega-text">삼성 갤럭시 워치</span>
                                     </a>
                                     <a href="#" class="mega-item d-flex flex-column align-items-center">
-                                        <img src="{{ url_for('static', filename='images/menu/watch2.jpg') }}" alt="애플워치"
-                                            class="mega-img">
+                                        <img src="{{ url_for('static', filename='images/menu/watch2.jpg') }}" alt="애플워치" class="mega-img">
                                         <span class="mega-text">애플워치</span>
                                     </a>
                                     <a href="#" class="mega-item d-flex flex-column align-items-center">
-                                        <img src="{{ url_for('static', filename='images/menu/watch3.jpg') }}"
-                                            alt="샤오미 레드미" class="mega-img">
+                                        <img src="{{ url_for('static', filename='images/menu/watch3.jpg') }}" alt="샤오미 레드미" class="mega-img">
                                         <span class="mega-text">샤오미 레드미</span>
                                     </a>
                                     <a href="#" class="mega-item d-flex flex-column align-items-center">
-                                        <img src="{{ url_for('static', filename='images/menu/watch4.jpg') }}"
-                                            alt="어메이즈핏 빕" class="mega-img">
+                                        <img src="{{ url_for('static', filename='images/menu/watch4.jpg') }}" alt="어메이즈핏 빕" class="mega-img">
                                         <span class="mega-text">어메이즈핏 빕</span>
                                     </a>
                                     <a href="#" class="mega-item d-flex flex-column align-items-center">
-                                        <img src="{{ url_for('static', filename='images/menu/watch5.jpg') }}"
-                                            alt="가민 포러너" class="mega-img">
+                                        <img src="{{ url_for('static', filename='images/menu/watch5.jpg') }}" alt="가민 포러너" class="mega-img">
                                         <span class="mega-text">가민 포러너</span>
                                     </a>
+                                    <div class="ms-3 ps-4 border-start" style="height: 50px; display: flex; align-items: center;">
+                                        <a href="#" class="text-decoration-none fw-bold text-nowrap mega-view-all">더 많은 스마트워치 보러가기 <i class="bi bi-chevron-right"></i></a>
+                                    </div>
                                 </div>
                             </div>
                         </li>
@@ -315,96 +315,92 @@
                         <li class="nav-item dropdown">
                             <a class="nav-link" href="#" role="button" aria-expanded="false">태블릿</a>
                             <div class="dropdown-menu mega-menu shadow-sm">
-                                <div class="d-flex gap-4 justify-content-center">
+                                <div class="d-flex gap-4 justify-content-center align-items-center">
                                     <a href="#" class="mega-item d-flex flex-column align-items-center">
-                                        <img src="{{ url_for('static', filename='images/menu/tab1.jpg') }}"
-                                            alt="삼성 갤럭시탭" class="mega-img">
+                                        <img src="{{ url_for('static', filename='images/menu/tab1.jpg') }}" alt="삼성 갤럭시탭" class="mega-img">
                                         <span class="mega-text">삼성 갤럭시탭</span>
                                     </a>
                                     <a href="#" class="mega-item d-flex flex-column align-items-center">
-                                        <img src="{{ url_for('static', filename='images/menu/tab2.jpg') }}" alt="아이패드"
-                                            class="mega-img">
+                                        <img src="{{ url_for('static', filename='images/menu/tab2.jpg') }}" alt="아이패드" class="mega-img">
                                         <span class="mega-text">아이패드</span>
                                     </a>
                                     <a href="#" class="mega-item d-flex flex-column align-items-center">
-                                        <img src="{{ url_for('static', filename='images/menu/tab3.jpg') }}" alt="샤오미 패드"
-                                            class="mega-img">
+                                        <img src="{{ url_for('static', filename='images/menu/tab3.jpg') }}" alt="샤오미 패드" class="mega-img">
                                         <span class="mega-text">샤오미 패드</span>
                                     </a>
                                     <a href="#" class="mega-item d-flex flex-column align-items-center">
-                                        <img src="{{ url_for('static', filename='images/menu/tab4.jpg') }}" alt="레노버 탭"
-                                            class="mega-img">
+                                        <img src="{{ url_for('static', filename='images/menu/tab4.jpg') }}" alt="레노버 탭" class="mega-img">
                                         <span class="mega-text">레노버 탭</span>
                                     </a>
                                     <a href="#" class="mega-item d-flex flex-column align-items-center">
-                                        <img src="{{ url_for('static', filename='images/menu/tab5.jpg') }}"
-                                            alt="아이뮤즈 뮤패드" class="mega-img">
+                                        <img src="{{ url_for('static', filename='images/menu/tab5.jpg') }}" alt="아이뮤즈 뮤패드" class="mega-img">
                                         <span class="mega-text">아이뮤즈 뮤패드</span>
                                     </a>
+                                    <div class="ms-3 ps-4 border-start" style="height: 50px; display: flex; align-items: center;">
+                                        <a href="#" class="text-decoration-none fw-bold text-nowrap mega-view-all">더 많은 태블릿 보러가기 <i class="bi bi-chevron-right"></i></a>
+                                    </div>
                                 </div>
                             </div>
                         </li>
+
                         <li class="nav-item dropdown">
                             <a class="nav-link" href="#" role="button" aria-expanded="false">노트북</a>
                             <div class="dropdown-menu mega-menu shadow-sm">
-                                <div class="d-flex gap-4 justify-content-center">
+                                <div class="d-flex gap-4 justify-content-center align-items-center">
                                     <a href="#" class="mega-item d-flex flex-column align-items-center">
-                                        <img src="{{ url_for('static', filename='images/menu/notebook1.jpg') }}"
-                                            alt="삼성 갤럭시북" class="mega-img">
+                                        <img src="{{ url_for('static', filename='images/menu/notebook1.jpg') }}" alt="삼성 갤럭시북" class="mega-img">
                                         <span class="mega-text">삼성 갤럭시북</span>
                                     </a>
                                     <a href="#" class="mega-item d-flex flex-column align-items-center">
-                                        <img src="{{ url_for('static', filename='images/menu/notebook2.jpg') }}"
-                                            alt="맥북" class="mega-img">
+                                        <img src="{{ url_for('static', filename='images/menu/notebook2.jpg') }}" alt="맥북" class="mega-img">
                                         <span class="mega-text">맥북</span>
                                     </a>
                                     <a href="#" class="mega-item d-flex flex-column align-items-center">
-                                        <img src="{{ url_for('static', filename='images/menu/notebook3.jpg') }}"
-                                            alt="레노버 노트북" class="mega-img">
+                                        <img src="{{ url_for('static', filename='images/menu/notebook3.jpg') }}" alt="레노버 노트북" class="mega-img">
                                         <span class="mega-text">레노버 노트북</span>
                                     </a>
                                     <a href="#" class="mega-item d-flex flex-column align-items-center">
-                                        <img src="{{ url_for('static', filename='images/menu/notebook4.jpg') }}"
-                                            alt="lg 그램" class="mega-img">
+                                        <img src="{{ url_for('static', filename='images/menu/notebook4.jpg') }}" alt="lg 그램" class="mega-img">
                                         <span class="mega-text">lg 그램</span>
                                     </a>
                                     <a href="#" class="mega-item d-flex flex-column align-items-center">
-                                        <img src="{{ url_for('static', filename='images/menu/notebook5.jpg') }}"
-                                            alt="ASUS 젠북" class="mega-img">
+                                        <img src="{{ url_for('static', filename='images/menu/notebook5.jpg') }}" alt="ASUS 젠북" class="mega-img">
                                         <span class="mega-text">ASUS 젠북</span>
                                     </a>
+                                    <div class="ms-3 ps-4 border-start" style="height: 50px; display: flex; align-items: center;">
+                                        <a href="#" class="text-decoration-none fw-bold text-nowrap mega-view-all">더 많은 노트북 보러가기 <i class="bi bi-chevron-right"></i></a>
+                                    </div>
                                 </div>
                             </div>
                         </li>
+
                         <li class="nav-item dropdown">
                             <a class="nav-link" href="#" role="button" aria-expanded="false">헤드폰</a>
                             <div class="dropdown-menu mega-menu shadow-sm">
-                                <div class="d-flex gap-4 justify-content-center">
+                                <div class="d-flex gap-4 justify-content-center align-items-center">
                                     <a href="#" class="mega-item d-flex flex-column align-items-center">
-                                        <img src="{{ url_for('static', filename='images/menu/headphone1.jpg') }}"
-                                            alt="소니 WH" class="mega-img">
+                                        <img src="{{ url_for('static', filename='images/menu/headphone1.jpg') }}" alt="소니 WH" class="mega-img">
                                         <span class="mega-text">소니 WH</span>
                                     </a>
                                     <a href="#" class="mega-item d-flex flex-column align-items-center">
-                                        <img src="{{ url_for('static', filename='images/menu/headphone2.jpg') }}"
-                                            alt="애플 에어맥스" class="mega-img">
+                                        <img src="{{ url_for('static', filename='images/menu/headphone2.jpg') }}" alt="애플 에어맥스" class="mega-img">
                                         <span class="mega-text">애플 에어맥스</span>
                                     </a>
                                     <a href="#" class="mega-item d-flex flex-column align-items-center">
-                                        <img src="{{ url_for('static', filename='images/menu/headphone3.jpg') }}"
-                                            alt="보스 QC" class="mega-img">
+                                        <img src="{{ url_for('static', filename='images/menu/headphone3.jpg') }}" alt="보스 QC" class="mega-img">
                                         <span class="mega-text">보스 QC</span>
                                     </a>
                                     <a href="#" class="mega-item d-flex flex-column align-items-center">
-                                        <img src="{{ url_for('static', filename='images/menu/headphone4.jpg') }}"
-                                            alt="JBL Tune" class="mega-img">
+                                        <img src="{{ url_for('static', filename='images/menu/headphone4.jpg') }}" alt="JBL Tune" class="mega-img">
                                         <span class="mega-text">JBL Tune</span>
                                     </a>
                                     <a href="#" class="mega-item d-flex flex-column align-items-center">
-                                        <img src="{{ url_for('static', filename='images/menu/headphone5.jpg') }}"
-                                            alt="젠하이저 HD" class="mega-img">
+                                        <img src="{{ url_for('static', filename='images/menu/headphone5.jpg') }}" alt="젠하이저 HD" class="mega-img">
                                         <span class="mega-text">젠하이저 HD</span>
                                     </a>
+                                    <div class="ms-3 ps-4 border-start" style="height: 50px; display: flex; align-items: center;">
+                                        <a href="#" class="text-decoration-none fw-bold text-nowrap mega-view-all">더 많은 헤드폰 보러가기 <i class="bi bi-chevron-right"></i></a>
+                                    </div>
                                 </div>
                             </div>
                         </li>
@@ -412,32 +408,30 @@
                         <li class="nav-item dropdown">
                             <a class="nav-link" href="#" role="button" aria-expanded="false">블루투스 스피커</a>
                             <div class="dropdown-menu mega-menu shadow-sm">
-                                <div class="d-flex gap-4 justify-content-center">
+                                <div class="d-flex gap-4 justify-content-center align-items-center">
                                     <a href="#" class="mega-item d-flex flex-column align-items-center">
-                                        <img src="{{ url_for('static', filename='images/menu/speaker1.jpg') }}"
-                                            alt="JBL GO" class="mega-img">
+                                        <img src="{{ url_for('static', filename='images/menu/speaker1.jpg') }}" alt="JBL GO" class="mega-img">
                                         <span class="mega-text">JBL GO</span>
                                     </a>
                                     <a href="#" class="mega-item d-flex flex-column align-items-center">
-                                        <img src="{{ url_for('static', filename='images/menu/speaker2.jpg') }}"
-                                            alt="소니 SRS" class="mega-img">
+                                        <img src="{{ url_for('static', filename='images/menu/speaker2.jpg') }}" alt="소니 SRS" class="mega-img">
                                         <span class="mega-text">소니 SRS</span>
                                     </a>
                                     <a href="#" class="mega-item d-flex flex-column align-items-center">
-                                        <img src="{{ url_for('static', filename='images/menu/speaker3.jpg') }}"
-                                            alt="보스 사운드링크" class="mega-img">
+                                        <img src="{{ url_for('static', filename='images/menu/speaker3.jpg') }}" alt="보스 사운드링크" class="mega-img">
                                         <span class="mega-text">보스 사운드링크</span>
                                     </a>
                                     <a href="#" class="mega-item d-flex flex-column align-items-center">
-                                        <img src="{{ url_for('static', filename='images/menu/speaker4.jpg') }}"
-                                            alt="브리츠 BZ" class="mega-img">
+                                        <img src="{{ url_for('static', filename='images/menu/speaker4.jpg') }}" alt="브리츠 BZ" class="mega-img">
                                         <span class="mega-text">브리츠 BZ</span>
                                     </a>
                                     <a href="#" class="mega-item d-flex flex-column align-items-center">
-                                        <img src="{{ url_for('static', filename='images/menu/speaker5.jpg') }}"
-                                            alt="LG XBOOM" class="mega-img">
+                                        <img src="{{ url_for('static', filename='images/menu/speaker5.jpg') }}" alt="LG XBOOM" class="mega-img">
                                         <span class="mega-text">LG XBOOM</span>
                                     </a>
+                                    <div class="ms-3 ps-4 border-start" style="height: 50px; display: flex; align-items: center;">
+                                        <a href="#" class="text-decoration-none fw-bold text-nowrap mega-view-all">더 많은 블루투스 스피커 보러가기 <i class="bi bi-chevron-right"></i></a>
+                                    </div>
                                 </div>
                             </div>
                         </li>
@@ -777,7 +771,17 @@ function updateAllTotalDisplays(totalPriceStr) {
     // 요약 패널: 총 금액 (배송비 제외)
     if (panelTotalEl) panelTotalEl.innerText = pureProductTotal.toLocaleString() + '원';
 }
+
     </script>
+
+    {% with messages = get_flashed_messages() %}
+        {% if messages %}
+            <script>
+                // 서버에서 보낸 메시지를 알림창으로 띄웁니다.
+                alert("{{ messages[0] }}");
+            </script>
+        {% endif %}
+    {% endwith %}
 </body>
 
 </html>
