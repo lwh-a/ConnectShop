@@ -1,0 +1,83 @@
+.membership-wrap {
+    padding: 80px 20px;
+    text-align: center;
+    background-color: #f8f9fa;
+}
+
+.membership-title {
+    font-size: 2.5rem;
+    font-weight: bold;
+    margin-bottom: 50px;
+}
+.membership-title .highlight {
+    color: #007bff;        /* 파란색으로 강조 (버튼 색상과 통일) */
+    font-weight: 800;      /* 더 두껍게 */
+    position: relative;    /* 밑줄 효과 등을 줄 때 유용 */
+}
+
+.benefit-container {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.benefit-box {
+    display: flex;
+    align-items:flex-start;   /* 아이콘과 텍스트 중앙 맞춤 */
+    padding: 30px;
+    border: 1px solid #eee;
+    border-radius: 12px;
+    background-color: #f9f9f9;
+}
+
+/* 아이콘 크기 및 간격 */
+.benefit-icon {
+    font-size: 2.5rem;
+    margin-right: 25px;
+    color: #007bff;
+    margin-top: 5px;
+}
+
+/* 텍스트 내용 정렬 */
+.benefit-detail {
+    flex: 1;
+    text-align: left;
+    line-height: 1.6;
+}
+
+/* 질문하신 span 강조 스타일링 */
+.benefit-detail span {
+    display: block;        /* 줄바꿈을 위해 블록 요소로 변경 */
+    font-weight: bold;     /* 굵게 */
+    color: #333;           /* 색상 강조 */
+    margin-bottom: 8px;    /* 본문과의 간격 */
+    font-size: 1.1rem;
+}
+
+/* 하단 강조용 span (마지막 span) */
+.benefit-detail span:last-child {
+    margin-top: 10px;
+    margin-bottom: 0;
+    color: #007bff;        /* 브랜드 컬러로 강조 */
+}
+
+.subscribe-section {
+    margin-top: 60px;
+}
+
+.btn-subscribe {
+    background-color: #007bff;
+    color: white;
+    padding: 15px 60px;
+    font-size: 1.2rem;
+    border-radius: 30px;
+    border: none;
+    font-weight: bold;
+    transition: background 0.3s;
+}
+
+.btn-subscribe:hover {
+    background-color: #0056b3;
+}

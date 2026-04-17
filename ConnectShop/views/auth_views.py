@@ -1,4 +1,6 @@
 import functools
+from os import abort
+
 import requests
 
 from datetime import datetime, timedelta, timezone
@@ -326,6 +328,48 @@ def me():
         payment_method=payment_info,
         coupon_count=coupon_count
     )
+
+
+@bp.route('/membership')
+@login_required
+def membership():
+    return render_template('auth/membership.html')
+
+
+@bp.route('/membership/subscribe', methods=['POST'])
+@login_required
+def subscribe():
+    from ConnectShop.models import MembershipBenefit
+    from sqlalchemy.exc import IntegrityError
+
+    if not g.user:
+        abort(401)
+
+    try:
+        g.user.is_membership = True
+        db.session.add(g.user)
+
+        benefit = MembershipBenefit.query.filter_by(user_id=g.user.id).first()
+
+        if not benefit:
+            benefit = MembershipBenefit(
+                user_id=g.user.id,
+                has_apple_care=True,
+                free_shipping=True
+            )
+            db.session.add(benefit)
+        else:
+            benefit.has_apple_care = True
+            benefit.free_shipping = True
+
+        db.session.commit()
+        flash("멤버십 가입이 완료되었습니다! 이제 모든 혜택을 이용하실 수 있습니다.")
+
+    except IntegrityError:
+        db.session.rollback()
+        flash("이미 멤버십 가입이 처리되었거나 처리 중입니다.")
+
+    return redirect(url_for('auth.mypage'))
 
 
 
