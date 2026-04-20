@@ -1,6 +1,8 @@
 import functools
 import requests
 
+from os import abort
+from sqlalchemy import func
 from datetime import datetime, timedelta, timezone
 from flask import Blueprint, render_template, request, redirect, url_for, flash, session, g
 from sqlalchemy.exc import IntegrityError
@@ -150,7 +152,7 @@ def mypage():
         .count()
     )
 
-    # ✅ 구매확정된 "상품 목록"
+    # ✅ 구매확정된 상품 목록
     confirmed_products = (
         db.session.query(Product)
         .join(OrderItem, Product.id == OrderItem.product_id)
@@ -165,13 +167,33 @@ def mypage():
         .all()
     )
 
+    # ✅ 구매한 상품 ID 목록
+    purchased_product_ids = (
+        db.session.query(OrderItem.product_id)
+        .join(Order, Order.id == OrderItem.order_id)
+        .filter(Order.user_id == g.user.id)
+        .all()
+    )
+    purchased_ids = [p[0] for p in purchased_product_ids]
+
+    # ✅ 맞춤 제품 추천 (구매한 상품 제외 + 랜덤)
+    recommended_products = (
+        Product.query
+        .filter(~Product.id.in_(purchased_ids))
+        .order_by(func.random())
+        .limit(5)
+        .all()
+    )
+
     return render_template(
         'auth/mypage.html',
         user=g.user,
         coupon_count=coupon_count,
         shipping_count=shipping_count,
-        confirmed_products=confirmed_products
+        confirmed_products=confirmed_products,
+        recommended_products=recommended_products
     )
+
 
 
 @bp.route('/orders')
@@ -272,16 +294,16 @@ def get_welcome_coupon():
 
     # 2. 멤버십 상태에 따른 금액 결정
     if g.user.is_membership:
-        amount = 3000
-        msg = "멤버십 전용 3,000원 쿠폰이 발급되었습니다!"
+        rate = 10  # 10%
+        msg = "멤버십 전용 10% 할인 쿠폰이 발급되었습니다!"
     else:
-        amount = 1000
-        msg = "신규 가입 축하 1,000원 쿠폰이 발급되었습니다!"
+        rate = 3  # 3%
+        msg = "신규 가입 축하 3% 할인 쿠폰이 발급되었습니다!"
 
-    # 3. 쿠폰 데이터 생성 및 저장
+        # 3. 쿠폰 데이터 생성 및 저장
     new_coupon = Coupon(
         user_id=g.user.id,
-        discount_amount=amount,
+        discount_amount=rate,
         is_used=False
     )
 
@@ -326,6 +348,48 @@ def me():
         payment_method=payment_info,
         coupon_count=coupon_count
     )
+
+
+@bp.route('/membership')
+@login_required
+def membership():
+    return render_template('auth/membership.html')
+
+
+@bp.route('/membership/subscribe', methods=['POST'])
+@login_required
+def subscribe():
+    from ConnectShop.models import MembershipBenefit
+    from sqlalchemy.exc import IntegrityError
+
+    if not g.user:
+        abort(401)
+
+    try:
+        g.user.is_membership = True
+        db.session.add(g.user)
+
+        benefit = MembershipBenefit.query.filter_by(user_id=g.user.id).first()
+
+        if not benefit:
+            benefit = MembershipBenefit(
+                user_id=g.user.id,
+                has_apple_care=True,
+                free_shipping=True
+            )
+            db.session.add(benefit)
+        else:
+            benefit.has_apple_care = True
+            benefit.free_shipping = True
+
+        db.session.commit()
+        flash("멤버십 가입이 완료되었습니다! 이제 모든 혜택을 이용하실 수 있습니다.")
+
+    except IntegrityError:
+        db.session.rollback()
+        flash("이미 멤버십 가입이 처리되었거나 처리 중입니다.")
+
+    return redirect(url_for('auth.mypage'))
 
 
 

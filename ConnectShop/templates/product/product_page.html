@@ -122,18 +122,18 @@
 
     <ul class="list-unstyled mb-4">
         <li class="mb-2 small">
-            <i class="bi bi-check2 text-success me-2"></i>구매 금액의 <strong>3% 적립</strong>
+            <i class="bi bi-check2 text-success me-2"></i>일상 속 예상치 못한 사고까지 안심 보장
         </li>
         <li class="mb-2 small">
-            <i class="bi bi-check2 text-success me-2"></i>무료 배송 및 <strong>익일 도착</strong> 보장
+            <i class="bi bi-check2 text-success me-2"></i>추가 비용 없는 무제한 무료 배송
         </li>
         <li class="mb-2 small">
-            <i class="bi bi-check2 text-success me-2"></i>멤버십 전용 <strong>추가 5% 할인 쿠폰</strong>
+            <i class="bi bi-check2 text-success me-2"></i>브랜드별 AS로 이어지는 전문가 상담 지원
         </li>
     </ul>
 
     <div class="d-grid mb-3">
-        <a href="#" class="btn btn-outline-dark rounded-pill fw-bold py-2">
+        <a href="{{ url_for('auth.membership') }}" class="btn btn-outline-dark rounded-pill fw-bold py-2">
             멤버십 가입하고 혜택 받기 <i class="bi bi-arrow-right ms-1"></i>
         </a>
     </div>
@@ -142,10 +142,10 @@
         <p class="text-muted mb-1" style="font-size: 0.7rem;">
             <i class="bi bi-exclamation-circle me-1"></i> <strong>주의사항</strong>
         </p>
-        <ul class="text-muted ps-3 mb-0" style="font-size: 0.65rem;">
-            <li>일부 품목은 멤버십 할인 대상에서 제외될 수 있습니다.</li>
-            <li>적립금은 배송 완료 14일 이후 자동 지급됩니다.</li>
-            <li>멤버십 탈퇴 시 보유하신 쿠폰 및 적립금은 즉시 소멸됩니다.</li>
+        <ul class="text-muted ps-3 mb-0" style="font-size: 0.65rem;"><li>본 멤버십의 <strong>우발적 손상(LDI) 지원</strong>은 브랜드 공식 서비스 센터를 통한 수리 시에만 유효하며, 사설 업체 이용 시 혜택이 제한됩니다.</li>
+        <li><strong>전문가 상담 및 AS 대행</strong>은 하드웨어 결함 및 기본 소프트웨어 오류에 한하며, 사용자 과실로 인한 데이터 복구 등은 포함되지 않습니다.</li>
+        <li>제품별 공식 보증 기간(Warranty)과 커넥션 케어+의 지원 범위가 상이할 수 있으므로 상세 안내를 반드시 확인하시기 바랍니다.</li>
+        <li>멤버십 중도 해지 시, 해당 시점부터 모든 무료 배송 및 케어 서비스 접수가 즉시 중단됩니다.</li>
         </ul>
     </div>
 </div>
@@ -281,6 +281,9 @@
         </div>
     </div>
 </div>
+{# 유저의 멤버십 상태를 스크립트가 읽을 수 있도록 숨겨진 input 생성 #}
+<input type="hidden" id="is-membership" value="{{ 'true' if g.user and g.user.is_membership else 'false' }}">
+
 
 <script>
 // [1] 전역 상태 관리
@@ -294,13 +297,19 @@ const DEFAULT_SHIPPING_FEE = 3000; // 기본 배송비 설정
  */
 function refreshTotalDisplay() {
     const quantityVal = document.getElementById('quantity-val');
+    if (!quantityVal) return;
+
+    // [1] 기본 데이터 가져오기
     const basePrice = parseInt(document.getElementById('raw-price')?.value || 0);
     const maxStock = parseInt(document.getElementById('max-stock')?.value || 0);
     const warningMsg = document.getElementById('stock-warning');
-
-    if (!quantityVal) return;
-
     const currentQty = parseInt(quantityVal.innerText);
+
+    // 멤버십 여부 확인 (HTML의 hidden input 읽기)
+    const isMembership = document.getElementById('is-membership')?.value === 'true';
+    const membershipBadge = document.getElementById('membership-badge');
+
+    // [2] 계산 시작
     let extraPrice = 0;
 
     // A. 활성화된 옵션의 추가 금액 계산
@@ -309,54 +318,70 @@ function refreshTotalDisplay() {
         if (add) extraPrice += parseInt(add);
     });
 
-    // B. 기준가 계산 (수량 반영된 순수 상품가)
+    // B. 상품 총액 계산 (기본가 + 옵션가) * 수량
     let productTotal = (basePrice + extraPrice) * currentQty;
 
-    // C. 배송비 계산 및 멤버십 혜택 적용
+    // C. 배송비 결정 (멤버십 혜택 적용)
     let shippingFee = 0;
-    const isMembership = document.getElementById('is-membership')?.value === 'true';
-    const membershipBadge = document.getElementById('membership-badge');
-
     if (isMembership) {
         shippingFee = 0;
-        if (membershipBadge) membershipBadge.innerHTML = '<small class="text-primary fw-bold" style="font-size: 0.65rem;">(멤버십 무료)</small>';
+        if (membershipBadge) {
+            membershipBadge.innerHTML = '<small class="text-primary fw-bold" style="font-size: 0.65rem;">(멤버십 무료배송)</small>';
+        }
     } else {
         shippingFee = DEFAULT_SHIPPING_FEE;
         if (membershipBadge) membershipBadge.innerHTML = '';
     }
 
-    // D. 최종 결제 금액 산출 (할인은 가장 마지막에 적용)
+    // D. 최종 결제 금액 산출 (상품가 + 배송비 - 쿠폰할인)
     let finalTotal = (productTotal + shippingFee) - appliedDiscount;
     if (finalTotal < 0) finalTotal = 0;
 
-    // E. 화면 UI 업데이트 (상세 내역 동기화)
+    // [3] 화면 UI 업데이트
     const formattedTotal = finalTotal.toLocaleString('ko-KR');
 
-    // 1) 상세 내역 영역 업데이트
+   // 1) 상세 내역 영역 (금액 콤마 표시)
     if(document.getElementById('breakdown-order-total'))
         document.getElementById('breakdown-order-total').innerText = productTotal.toLocaleString();
+
     if(document.getElementById('breakdown-delivery-fee'))
         document.getElementById('breakdown-delivery-fee').innerText = shippingFee.toLocaleString();
-    if(document.getElementById('breakdown-coupon-discount'))
-        document.getElementById('breakdown-coupon-discount').innerText = appliedDiscount.toLocaleString();
 
-    // 2) 쿠폰 할인 행 표시 제어
-    const couponRow = document.getElementById('coupon-discount-row');
-    if (couponRow) {
+    // --- 수정된 부분: 쿠폰 할인액 표시 ---
+    const couponDiscountElement = document.getElementById('breakdown-coupon-discount');
+    if (couponDiscountElement) {
         if (appliedDiscount > 0) {
-            couponRow.setAttribute('style', 'display: flex !important;');
+            // 할인이 있을 때만 마이너스 표시와 함께 금액 노출
+            couponDiscountElement.innerText = "-" + appliedDiscount.toLocaleString();
         } else {
-            couponRow.setAttribute('style', 'display: none !important;');
+            // 할인이 없으면 텍스트를 비움 (0원 표시 삭제)
+            couponDiscountElement.innerText = "";
         }
     }
 
-    // 3) 최종가 및 스티키 바 가격 업데이트
-    const displayPrice = document.getElementById('display-final-price');
-    const totalPrice = document.getElementById('total-final-price');
+    // 2) 쿠폰 할인 행 표시 제어 (할인이 있을 때만 나타남)
+    const couponRow = document.getElementById('coupon-discount-row');
+    const couponDisplay = document.getElementById('breakdown-coupon-discount');
+
+    if (couponRow && couponDisplay) {
+        if (appliedDiscount > 0) {
+            // 할인이 있으면 숫자를 넣고 행을 보여줌
+            couponDisplay.innerText = appliedDiscount.toLocaleString();
+            couponRow.style.setProperty('display', 'flex', 'important');
+        } else {
+            // 할인이 없으면 행을 완전히 숨김
+            couponRow.style.setProperty('display', 'none', 'important');
+        }
+    }
+
+    // 3) 최종가 업데이트
+    const displayPrice = document.getElementById('display-final-price'); // 메인 가격
+    const totalPrice = document.getElementById('total-final-price');     // 박스 안 큰 가격
+
     if (displayPrice) displayPrice.innerText = formattedTotal;
     if (totalPrice) totalPrice.innerText = formattedTotal;
 
-    // F. 기타 부가 기능 (재고 경고 등)
+    // 4) 재고 경고 표시
     if (warningMsg) warningMsg.style.display = (currentQty >= maxStock) ? 'block' : 'none';
 }
 
@@ -468,6 +493,29 @@ function addToCartWithOptions(productId) {
     });
 }
     function buyNow(productId) {
+    // 1. 검증: 사용자가 작성하신 class="option-group"을 모두 찾습니다.
+    const optionGroups = document.querySelectorAll('.option-group');
+    const activeButtons = document.querySelectorAll('.option-btn.active');
+
+    // 2. 그룹 개수와 활성화된 버튼 개수가 다르면 미선택으로 간주
+    if (optionGroups.length > 0 && activeButtons.length < optionGroups.length) {
+        let missingNames = [];
+
+        optionGroups.forEach(group => {
+            // 이 그룹 안에 active 클래스가 붙은 버튼이 있는지 확인
+            const hasActive = group.querySelector('.option-btn.active');
+            if (!hasActive) {
+                // <label> 태그 안에 있는 otype(색상, 칩셋 등) 텍스트를 가져옴
+                const title = group.querySelector('label')?.innerText || "옵션";
+                missingNames.push(title.trim());
+            }
+        });
+
+        alert(`다음 옵션을 선택해 주세요: ${missingNames.join(', ')}`);
+        return; // 구매 중단
+    }
+
+    // --- 이하 기존 로그인 체크 및 결제 로직 ---
     const isLoggedIn = document.getElementById('is-logged-in')?.value === 'true';
     const quantity = parseInt(document.getElementById('quantity-val').innerText);
 
@@ -478,23 +526,22 @@ function addToCartWithOptions(productId) {
         if (optId) selectedOptions.push(optId);
     });
 
-    // 1. 비회원 체크 로직
+    // 2. 비회원 체크 로직 (질문 수정: 예/아니요 느낌으로)
     if (!isLoggedIn) {
-        if (!confirm("로그인 후 구매하시면 쿠폰 혜택을 받으실 수 있습니다.\n비회원으로 구매하시겠습니까?")) {
+        if (!confirm("로그인 후 구매하시면 쿠폰 혜택을 받으실 수 있습니다.\n비회원으로 구매하시겠습니까?\n(취소 시 로그인 페이지로 이동합니다.)")) {
             location.href = "{{ url_for('auth.login') }}";
             return;
         }
     }
 
-    // 2. 서버로 보낼 데이터 구성
-    // 팀원분의 checkout 함수가 GET으로 데이터를 받을 수 있게 쿼리 스트링을 만듭니다.
+    // 3. 서버로 데이터 전송
     const baseUrl = "{{ url_for('order.checkout') }}";
     const params = new URLSearchParams({
-        direct_buy: 'true',           // 바로구매인지 장바구니구매인지 구분값
+        direct_buy: 'true',
         product_id: productId,
         quantity: quantity,
         options: selectedOptions.join(','),
-        coupon_id: appliedCouponId || '' // 전역 변수 사용
+        coupon_id: appliedCouponId || ''
     });
 
     location.href = `${baseUrl}?${params.toString()}`;
