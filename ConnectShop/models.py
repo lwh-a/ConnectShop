@@ -181,3 +181,17 @@ class WithdrawnEmail(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     email = db.Column(db.String(120), unique=True, index=True, nullable=False)
     withdrawn_at = db.Column(db.DateTime, nullable=False, default=lambda: datetime.now(timezone.utc))
+
+# =========================================================
+# 10. 찜목록(Wishlist) 테이블
+# =========================================================
+class Wishlist(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    # 누가 찜했는지
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id', ondelete='CASCADE'), nullable=False)
+    # 어떤 상품을 찜했는지
+    product_id = db.Column(db.Integer, db.ForeignKey('product.id', ondelete='CASCADE'), nullable=False)
+
+    # 파이썬 코드에서 쉽게 데이터를 꺼내오기 위한 관계 설정
+    user = db.relationship('User', backref=db.backref('wishlist_items', cascade='all, delete-orphan'))
+    product = db.relationship('Product', backref=db.backref('wishlisted_by', cascade='all, delete-orphan'))

@@ -9,6 +9,7 @@
                      alt="{{ brand }} 로고"
                      class="me-2"
                      style="height: 1.5em; width: auto; object-fit: contain;">
+                <span>{{ brand }} 제품</span>
             </h3>
 
             <div class="product-slider-wrapper position-relative">
@@ -16,13 +17,33 @@
                     {% for product in products %}
                     <div class="product-card-item col-12 col-sm-6 col-md-4 col-lg-3 p-2">
                         <div class="card h-100 border-0 shadow-sm rounded-4 overflow-hidden">
+                            
+                            {# 🌟 팀장님의 로그인한 유저의 찜 여부 확인 로직 융합 #}
+                            {% set is_wished = false %}
+                            {% if g.user %}
+                                {% for wish in g.user.wishlist_items %}
+                                    {% if wish.product_id == product.id %}
+                                        {% set is_wished = true %}
+                                    {% endif %}
+                                {% endfor %}
+                            {% endif %}
+
                             <div class="bg-light p-4 text-center">
                                 <img src="{{ url_for('static', filename='images/menu/' + product.image_path) if product.image_path else '' }}"
                                      class="img-fluid" style="height: 180px; object-fit: contain;" alt="{{ product.name }}">
                             </div>
+                            
                             <div class="card-body">
                                 <p class="text-muted small mb-1">{{ product.brand }}</p>
-                                <h6 class="fw-bold text-truncate">{{ product.name }}</h6>
+                                
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <h6 class="fw-bold text-truncate mb-0" style="max-width: 80%;">{{ product.name }}</h6>
+                                    <button class="border-0 bg-transparent p-0 me-1" onclick="toggleWishlist(event, {{ product.id }}, this)">
+                                        <i class="bi {% if is_wished %}bi-heart-fill text-danger{% else %}bi-heart text-secondary{% endif %}"
+                                           style="font-size: 1.2rem; cursor: pointer;"></i>
+                                    </button>
+                                </div>
+
                                 <p class="text-primary fw-bold mb-3">{{ "{:,}".format(product.price) }}원</p>
                                 <a href="{{ url_for('product.page', product_id=product.id) }}"
                                    class="btn btn-dark w-100 rounded-pill btn-sm mb-2">상세보기</a>
@@ -58,31 +79,27 @@
 
 <style>
     .product-track {
-    /* 기존 속성 삭제 후 아래 유지 */
-    display: flex;
-    will-change: transform;
+        display: flex;
+        will-change: transform;
     }
 
     .product-card-item {
-        /* scroll-snap-align 삭제 */
         flex: 0 0 25%; /* 한 화면에 4개 보일 때 (lg 기준) */
         display: block;
     }
 
-    /* 태블릿/모바일 대응을 위해 flex 비율 조정 (선택사항) */
+    /* 태블릿/모바일 대응을 위해 flex 비율 조정 */
     @media (max-width: 992px) { .product-card-item { flex: 0 0 33.333%; } }
     @media (max-width: 768px) { .product-card-item { flex: 0 0 50%; } }
     @media (max-width: 576px) { .product-card-item { flex: 0 0 100%; } }
 
     .product-slider-wrapper {
-        overflow: hidden; /* 트랙이 삐져나가지 않게 부모에서 가려줌 */
+        overflow: hidden; 
     }
 
-    /* 2. 카드 호버 효과 */
     .card { transition: 0.3s; }
     .card:hover { transform: translateY(-5px); }
 
-    /* 3. 커스텀 버튼 스타일 */
     .slider-nav-btn {
         position: absolute;
         top: 50%;
@@ -105,33 +122,28 @@
 </style>
 
 <script>
-    function moveSlide(index, direction) {
+// 🌟 팀원의 슬라이더 이동 스크립트 
+function moveSlide(index, direction) {
     const track = document.getElementById(`product-track-${index}`);
     const items = track.querySelectorAll('.product-card-item');
     if (items.length <= 1) return;
 
-    const cardWidth = items[0].offsetWidth; // 한 칸의 너비
+    const cardWidth = items[0].offsetWidth;
 
     if (direction === 1) {
-        // [Next 버튼 클릭]
-        // 1. 트랙을 왼쪽으로 한 칸 이동 시킴
         track.style.transition = "transform 0.4s ease-in-out";
         track.style.transform = `translateX(-${cardWidth}px)`;
 
-        // 2. 애니메이션 완료 후 첫 요소를 맨 뒤로 보내고 위치 초기화
         setTimeout(() => {
             track.style.transition = "none";
             track.appendChild(track.firstElementChild);
             track.style.transform = `translateX(0)`;
         }, 400);
     } else {
-        // [Prev 버튼 클릭]
-        // 1. 애니메이션 없이 즉시 마지막 요소를 맨 앞으로 이동 시키고 위치 보정
         track.style.transition = "none";
         track.prepend(track.lastElementChild);
         track.style.transform = `translateX(-${cardWidth}px)`;
 
-        // 2. 부드럽게 0 위치로 당겨옴
         setTimeout(() => {
             track.style.transition = "transform 0.4s ease-in-out";
             track.style.transform = `translateX(0)`;
@@ -139,7 +151,8 @@
     }
 }
 
-    async function addCartCatalog(productId) {
+// 🌟 공통 장바구니 담기
+async function addCartCatalog(productId) {
     try {
         const response = await fetch(`/order/add/${productId}`, {
             method: 'POST',
@@ -151,23 +164,60 @@
         const data = await response.json();
 
         if (data.success) {
-            // 1. 장바구니로 바로 가겠냐고 물어봄
             if (confirm("장바구니에 상품을 담았습니다.\n지금 확인하시겠습니까?")) {
                 location.href = "{{ url_for('order._list') }}";
             } else {
-                // 2. '취소'를 눌러도 데이터는 담겼으므로,
-                // 요약 장바구니 수치를 반영하기 위해 현재 페이지를 새로고침만 함
                 location.reload();
             }
         } else {
-            // 서버에서 success: false를 보낸 경우
             alert(data.message || "장바구니 담기에 실패했습니다.");
         }
     } catch (error) {
-        // 네트워크 오류나 서버 다운 등의 진짜 에러인 경우
         console.error('Error:', error);
         alert("통신 오류가 발생했습니다.");
     }
+}
+
+// 🌟 팀장님의 찜하기(하트) 토글 함수
+function toggleWishlist(event, productId, btnElement) {
+    event.preventDefault(); 
+    event.stopPropagation(); 
+
+    const isLoggedIn = {{ 'true' if g.user else 'false' }};
+    if (!isLoggedIn) {
+        if (confirm("로그인 후 찜하기 기능을 이용하실 수 있습니다.\n로그인 페이지로 이동할까요?")) {
+            location.href = "{{ url_for('auth.login') }}";
+        }
+        return;
+    }
+
+    fetch(`/product/wishlist/${productId}`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest'
+        }
+    })
+    .then(response => {
+        if (response.status === 401) {
+            alert("로그인이 만료되었습니다.");
+            return null;
+        }
+        return response.json();
+    })
+    .then(data => {
+        if (data && data.success) {
+            const icon = btnElement.querySelector('i');
+            if (data.status === 'added') {
+                icon.classList.remove('bi-heart', 'text-secondary');
+                icon.classList.add('bi-heart-fill', 'text-danger');
+            } else if (data.status === 'removed') {
+                icon.classList.remove('bi-heart-fill', 'text-danger');
+                icon.classList.add('bi-heart', 'text-secondary');
+            }
+        }
+    })
+    .catch(error => console.error('Error:', error));
 }
 </script>
 {% endblock %}
