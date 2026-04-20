@@ -9,8 +9,7 @@
         <div class="nav-left-section">
             <div class="product-title-small">{{ product.name }}</div>
             <div class="nav-hyperlinks">
-                <a href="#section-images" class="me-2">이미지</a>
-                <a href="#section-details">상세정보</a>
+                <a href="#section-reviews" class="me-2">상품 리뷰</a>
             </div>
         </div>
 
@@ -130,7 +129,7 @@
     <ul class="list-unstyled mb-4">
         <li class="mb-2 small"><i class="bi bi-check2 text-success me-2"></i>구매 금액의 <strong>3% 적립</strong></li>
         <li class="mb-2 small"><i class="bi bi-check2 text-success me-2"></i>무료 배송 및 <strong>익일 도착</strong> 보장</li>
-        <li class="mb-2 small"><i class="bi bi-check2 text-success me-2"></i>멤버십 전용 <strong>추가 5% 할인 쿠폰</strong></li>
+        <li class="mb-2 small"><i class="bi bi-check2 text-success me-2"></i>멤버십 전용 <strong>추가 10% 할인 쿠폰</strong></li>
         <li class="mb-2 small"><i class="bi bi-check2 text-success me-2"></i>일상 속 예상치 못한 사고까지 <strong>안심 보장</strong></li>
         <li class="mb-2 small"><i class="bi bi-check2 text-success me-2"></i>브랜드별 AS로 이어지는 <strong>전문가 상담 지원</strong></li>
     </ul>
@@ -150,77 +149,69 @@
     </div>
 </div>
 
-<section id="what-in-the-box" class="py-5 bg-white border-top">
+<section id="checkout-summary" class="py-5 bg-white border-top">
     <div class="container">
-        <div class="row align-items-center">
-            <div class="col-lg-8 text-center position-relative mb-5 mb-lg-0">
-                <h4 class="fw-bold text-start mb-5 ms-3">What's in the box</h4>
-                <div class="d-flex justify-content-center align-items-center">
-                    {% if product.box_image_path %}
-                    <img src="{{ url_for('static', filename=product.box_image_path) }}" alt="구성품 이미지" style="max-width: 100%; height: auto; max-height: 400px;">
-                    {% else %}
-                    <p class="text-muted">구성품 이미 준비 중입니다.</p>
-                    {% endif %}
-                </div>
-                <p class="text-muted mt-5 small text-start ps-3" style="line-height: 1.6;">
-                    {{ product.box_description|safe if product.box_description else '상품 구성 정보가 없습니다.' }}
-                </p>
-            </div>
+        <div class="row justify-content-center">
+            <div class="col-lg-10">
+                <div class="border rounded-4 p-5 shadow-sm bg-light">
+                    <h5 class="fw-bold mb-4 text-center">최종 구매 혜택가</h5>
 
-            <div class="col-lg-4 border rounded-4 p-4 shadow-sm bg-light">
-                <h6 class="fw-bold mb-4">최종 구매 혜택가</h6>
+                    <div class="price-detail-box bg-white rounded-3 p-4 mb-4">
+                        <div class="d-flex justify-content-between mb-3">
+                            <span class="text-muted">상품 금액</span>
+                            <span class="fw-bold"><span id="breakdown-order-total">{{ "{:,}".format(product.price) }}</span>원</span>
+                        </div>
 
-                <div class="price-detail-box bg-white rounded-3 p-3">
-                    <div class="d-flex justify-content-between mb-2 small">
-                        <span>기준가</span>
-                        <span class="fw-bold"><span id="breakdown-order-total">{{ "{:,}".format(product.price) }}</span>원</span>
-                    </div>
+                        <div class="d-flex justify-content-between mb-3">
+                            <span class="text-muted">배송비 <span id="membership-badge"></span></span>
+                            <span class="text-dark">+<span id="breakdown-delivery-fee">-</span>원</span>
+                        </div>
 
-                    <div class="d-flex justify-content-between mb-2 small">
-                        <span>배송비 <span id="membership-badge"></span></span>
-                        <span class="text-dark">+<span id="breakdown-delivery-fee">-</span>원</span>
-                    </div>
+                        <div id="coupon-discount-row" class="d-flex justify-content-between mb-3 text-danger" style="display: none !important;">
+                            <span>쿠폰 할인</span>
+                            <span>-<span id="breakdown-coupon-discount">-</span>원</span>
+                        </div>
 
-                    <div id="coupon-discount-row" class="d-flex justify-content-between mb-2 small text-danger" style="display: none !important;">
-                        <span>쿠폰 할인</span>
-                        <span>-<span id="breakdown-coupon-discount">-</span>원</span>
-                    </div>
-                    
-                    <hr class="my-3">
-                    
-                    <div class="d-flex justify-content-between align-items-center mb-4">
-                        <span class="fw-bold">최종 혜택 적용 예상가</span>
-                        <h3 class="text-primary fw-bold mb-0">
-                            <span id="total-final-price">{{ "{:,}".format(product.price + 3000) }}</span>원
-                        </h3>
-                    </div>
+                        <hr class="my-4">
 
-                    <div class="coupon-section mb-4">
-                        <button type="button" class="btn btn-outline-danger w-100 py-2 rounded-3 fw-bold shadow-sm"
-                                onclick="handleCouponClick()" style="border-style: dashed;">
-                            <i class="bi bi-ticket-perforated me-2"></i> 쿠폰 적용하기
-                        </button>
-                        <div id="selected-coupon-info" class="mt-2 small text-danger fw-bold" style="display: none;">
-                            <i class="bi bi-check-circle-fill"></i> <span id="applied-coupon-name"></span> (-<span id="applied-discount-amount">0</span>원)
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span class="fw-bold fs-5">최종 혜택 적용 예상가</span>
+                            <h2 class="text-primary fw-bold mb-0">
+                                <span id="total-final-price">{{ "{:,}".format(product.price + 3000) }}</span>원
+                            </h2>
                         </div>
                     </div>
 
-                    <div class="row g-2">
-                        <div class="col-3">
-                            <button type="button" class="btn btn-outline-dark w-100 py-3 rounded-pill" onclick="addToCartWithOptions({{ product.id }})">
-                                <i class="bi bi-bag"></i>
+                    <div class="action-buttons-group">
+                        <div class="mb-3">
+                            <button type="button" class="btn btn-outline-danger w-100 py-3 rounded-3 fw-bold shadow-sm"
+                                    onclick="handleCouponClick()" style="border-style: dashed;">
+                                <i class="bi bi-ticket-perforated me-2"></i> 적용 가능한 쿠폰 확인하기
+                            </button>
+                            <div id="selected-coupon-info" class="mt-2 text-center small text-danger fw-bold" style="display: none;">
+                                <i class="bi bi-check-circle-fill"></i> <span id="applied-coupon-name"></span> (-<span id="applied-discount-amount">0</span>원)
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <button type="button" class="btn btn-outline-dark w-100 py-3 rounded-pill fw-bold"
+                                    onclick="addToCartWithOptions({{ product.id }})">
+                                <i class="bi bi-bag me-2"></i> 장바구니 담기
                             </button>
                         </div>
-                        <div class="col-9">
-                            <button type="button" class="btn btn-dark w-100 py-3 rounded-pill fw-bold" onclick="buyNow({{ product.id }})">구매하기</button>
+
+                        <div class="mb-4">
+                            <button type="button" class="btn btn-dark w-100 py-3 rounded-pill fw-bold fs-5"
+                                    onclick="buyNow({{ product.id }})">
+                                바로 구매하기
+                            </button>
                         </div>
                     </div>
 
                     <input type="hidden" id="is-logged-in" value="{{ 'true' if g.user else 'false' }}">
-                    <input type="hidden" id="is-membership" value="{{ 'true' if g.user and g.user.is_membership else 'false' }}">
 
-                    <div class="text-center mt-3">
-                        <span class="text-muted delivery-date" style="font-size: 0.7rem;">
+                    <div class="text-center">
+                        <span class="text-muted delivery-date" style="font-size: 0.85rem;">
                             <i class="bi bi-truck me-1"></i> 로딩 중...
                         </span>
                     </div>
@@ -230,15 +221,39 @@
     </div>
 </section>
 
-<div class="product-content-wrapper" style="margin-top: 60px;">
-    <section id="section-images" style="height: 500px; background: #eee;">슬라이더 영역 예정</section>
-    <section id="section-details" style="height: 500px; background: #ddd;">상세 설명 영역 예정</section>
+<div class="product-content-wrapper" style="margin-top: 80px;">
+    <section class="recommended-section py-5">
+        <div class="container">
+            <div class="section-title mb-4">
+                <h4 class="fw-bold">{{ g.user.username if g.user else '고객' }}님을 위한 맞춤 제품</h4>
+            </div>
+
+            <div class="product-scroll-container">
+                <div class="product-scroll-wrapper">
+                    {% for p in recommended_products %}
+                    <div class="product-card-mini" onclick="location.href='{{ url_for('product.page', product_id=p.id) }}'">
+                        <div class="product-img-box">
+                            <img src="/static/images/menu/{{ p.image_path }}" alt="{{ p.name }}">
+                        </div>
+                        <div class="product-info-box">
+                            <span class="brand-tag">{{ p.brand }}</span>
+                            <p class="name-text">{{ p.name }}</p>
+                            <p class="price-text">{{ "{:,}".format(p.price) }}원</p>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </section>
+
+
 </div>
 
 <section id="section-reviews" class="py-5">
     <div class="container">
         <div class="product-reviews mt-5 pt-4 border-top">
-            <h4 class="fw-bold mb-4">상품 리뷰</h4>
+            <h4 class="fw-bold mb-4" id="section-reviews">상품 리뷰</h4>
 
             {% if g.user %}
                 {% if has_reviewed %}
@@ -392,6 +407,10 @@
     </div>
 </div>
 
+<input type="hidden" id="is-logged-in" value="{{ 'true' if g.user else 'false' }}">
+
+<input type="hidden" id="is-membership" value="{{ 'true' if g.user and g.user.is_membership else 'false' }}">
+
 <script>
 // [1] 전역 상태 관리
 let appliedCoupon = null; 
@@ -457,7 +476,7 @@ function refreshTotalDisplay() {
     const couponInfoAmount = document.getElementById('applied-discount-amount');
 
     if (discountValue > 0) {
-        if(couponDisplay) couponDisplay.innerText = "-" + discountValue.toLocaleString();
+        if(couponDisplay) couponDisplay.innerText = "" + discountValue.toLocaleString();
         if(couponInfoAmount) couponInfoAmount.innerText = discountValue.toLocaleString();
         if(couponRow) couponRow.style.setProperty('display', 'flex', 'important');
         if(couponInfoBox) couponInfoBox.style.display = 'block';
