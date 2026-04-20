@@ -21,7 +21,7 @@
                     <span id="display-final-price">{{ "{:,}".format(product.price) }}</span>원
                 </div>
             </div>
-            <button class="btn btn-primary rounded-pill px-4">구매하기</button>
+            <button class="btn btn-primary rounded-pill px-4" onclick="buyNow({{ product.id }})">구매하기</button>
         </div>
     </div>
 </div>
@@ -206,7 +206,7 @@
                             </button>
                         </div>
                         <div class="col-9">
-                            <button type="button" class="btn btn-dark w-100 py-3 rounded-pill fw-bold">구매하기</button>
+                            <button type="button" class="btn btn-dark w-100 py-3 rounded-pill fw-bold" onclick="buyNow({{ product.id }})">구매하기</button>
                         </div>
                     </div>
 
@@ -405,14 +405,106 @@ function checkCouponLogin() {
 }
 
 function addToCartWithOptions(productId) {
-    fetch(`/order/add/${productId}`)
-    .then(response => {
-        if (response.ok) {
-            if (confirm("장바구니에 상품을 담았습니다. 장바구니로 이동하시겠습니까?")) {
+    const qtyText = document.getElementById('quantity-val').innerText.trim();
+    const quantity = parseInt(qtyText);
+
+    const activeOptions = document.querySelectorAll('.option-btn.active');
+    let selectedOptionsArray = [];
+
+    activeOptions.forEach(btn => {
+        // 🌟 수정 포인트: 'oname' 텍스트만 정확히 가져옵니다.
+        const optionName = btn.querySelector('span:not(.color-circle)').innerText.trim();
+        selectedOptionsArray.push(optionName);
+    });
+
+    // 🌟 서버 전송용 문자열 생성 (예: "블랙 / 512GB")
+    const optionsString = selectedOptionsArray.join('/');
+
+    const totalGroups = document.querySelectorAll('.option-group').length;
+    if (activeOptions.length < totalGroups) {
+        alert("모든 옵션을 선택해주세요.");
+        return;
+    }
+
+    // 서버로 데이터 전송
+    fetch(`/order/add/${productId}`, {
+        method: 'POST',
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest',
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            quantity: quantity,
+            options: optionsString
+        })
+    })
+
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // 상단 네비바 배지 갱신
+            const badge = document.getElementById('cart-count-badge');
+            if (badge) badge.innerText = data.cart_count;
+
+            // 요약 패널 총합계 갱신
+            const panelTotal = document.getElementById('panel-total-price');
+            if (panelTotal) panelTotal.innerText = data.total_price + "원";
+
+            if (confirm("장바구니에 담겼습니다. 장바구니로 이동할까요?")) {
                 location.href = "{{ url_for('order._list') }}";
+            } else {
+                // 패널에 새로운 옵션 줄이 생겨야 하므로 새로고침이 필요합니다.
+                location.reload();
             }
         } else {
-            alert("장바구니 담기에 실패했습니다. (에러: " + response.status + ")");
+            alert("장바구니 담기에 실패했습니다.");
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert("서버 통신 중 오류가 발생했습니다.");
+    });
+}
+
+function buyNow(productId) {
+    const qtyText = document.getElementById('quantity-val').innerText.trim();
+    const quantity = parseInt(qtyText);
+
+    const activeOptions = document.querySelectorAll('.option-btn.active');
+    let selectedOptionsArray = [];
+
+    activeOptions.forEach(btn => {
+        const optionName = btn.querySelector('span:not(.color-circle)').innerText.trim();
+        selectedOptionsArray.push(optionName);
+    });
+
+    const optionsString = selectedOptionsArray.join('/');
+    const totalGroups = document.querySelectorAll('.option-group').length;
+
+    if (activeOptions.length < totalGroups) {
+        alert("모든 옵션을 선택해주세요.");
+        return;
+    }
+
+    // 서버로 데이터 전송 (addToCart와 동일한 경로 사용)
+    fetch(`/order/add/${productId}`, {
+        method: 'POST',
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest',
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            quantity: quantity,
+            options: optionsString
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // 🌟 성공 시 바로 결제 페이지로 이동
+            location.href = "{{ url_for('order.checkout') }}";
+        } else {
+            alert("주문 처리 중 오류가 발생했습니다.");
         }
     })
     .catch(error => {

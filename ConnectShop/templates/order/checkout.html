@@ -79,6 +79,18 @@
             <span id="display-discount">0원</span>
         </div>
 
+        <div class="summary-row" style="color: #007bff;">
+            <span>멤버십 적립 (3%)</span>
+            <span id="display-reward">
+                {% if g.user and g.user.is_membership %}
+                    {% set initial_reward = ((total_price|int - (0 if g.user.is_membership else 3000)) * 0.03)|int %}
+                    +{{ "{:,}".format(initial_reward) }}원
+                {% else %}
+                    0원
+                {% endif %}
+            </span>
+        </div>
+
         <div class="info-row">
             <span>배송비</span>
             <span class="info-value">
@@ -140,52 +152,53 @@ document.addEventListener("DOMContentLoaded", async function() {
 
     // [금액 업데이트 함수]
     window.updateTotalAmount = async function() {
-    const couponSelect = document.getElementById('coupon-select');
-    const selectedOption = couponSelect.options[couponSelect.selectedIndex];
+        const couponSelect = document.getElementById('coupon-select');
+        const selectedOption = couponSelect.options[couponSelect.selectedIndex];
 
-    // 쿠폰 정보 가져오기
-    const type = selectedOption.getAttribute('data-type'); // fixed 또는 percent
-    const val = parseInt(selectedOption.getAttribute('data-value')) || 0;
+        // 1. 기본 정보 추출
+        const val = parseInt(selectedOption.getAttribute('data-discount')) || 0; // data-discount 사용
+        const originalTotal = {{ total_price|int }};
+        const isMembership = {{ 'true' if g.user and g.user.is_membership else 'false' }};
+        const shippingFee = isMembership ? 0 : 3000;
+        const pureProductPrice = originalTotal - shippingFee;
 
-    const originalTotal = {{ total_price|int }}; // 배송비 포함 총액
+        // 2. 할인액 계산
+        let discount = val;
+        const updatedFinalAmount = Math.max(0, originalTotal - discount);
 
-    // 실제 상품가(Pure Total) 추출 (배송비 3,000원을 제외한 금액에만 할인을 적용하는 게 일반적임)
-    const isMembership = {{ 'true' if g.user and g.user.is_membership else 'false' }};
-    const shippingFee = isMembership ? 0 : 3000;
-    const pureProductPrice = originalTotal - shippingFee;
+        // 3. 🌟 실시간 적립금 계산 (배송비 제외 상품가에서 쿠폰할인 뺀 금액의 3%)
+        let rewardPoint = 0;
+        if (isMembership) {
+            const rewardBase = pureProductPrice - discount;
+            rewardPoint = Math.floor(Math.max(0, rewardBase) * 0.03);
+        }
 
-    let discount = 0;
+        // 4. UI 업데이트
+        // 쿠폰 할인 표시
+        document.getElementById('display-discount').innerText = (discount > 0 ? "-" : "") + discount.toLocaleString() + "원";
 
-    // [10% 할인 로직 핵심]
-    if (type === 'percent') {
-        // 상품 금액의 n% 계산
-        discount = Math.floor(pureProductPrice * (val / 100));
+        // 🌟 적립 예정 금액 표시 업데이트
+        const rewardDisplay = document.getElementById('display-reward');
+        if (rewardDisplay) {
+            rewardDisplay.innerText = (rewardPoint > 0 ? "+" : "") + rewardPoint.toLocaleString() + "원";
+        }
 
-        // (선택사항) 최대 할인 금액 제한 로직을 일하는 척하며 추가해봅니다.
-        // if (discount > 10000) discount = 10000;
-    } else {
-        // 기존의 정액 할인
-        discount = val;
-    }
+        // 총 결제 금액 표시
+        const finalTotalDisplay = document.querySelector('.summary-total span:last-child');
+        if (finalTotalDisplay) finalTotalDisplay.innerText = updatedFinalAmount.toLocaleString() + "원";
 
-    const updatedFinalAmount = Math.max(0, originalTotal - discount);
+        // 결제 버튼 텍스트
+        const payButton = document.getElementById('payment-button');
+        if (payButton) payButton.innerText = updatedFinalAmount.toLocaleString() + "원 결제하기";
 
-    // UI 업데이트
-    document.getElementById('display-discount').innerText = (discount > 0 ? "-" : "") + discount.toLocaleString() + "원";
-    const finalTotalDisplay = document.querySelector('.summary-total span:last-child');
-    if (finalTotalDisplay) finalTotalDisplay.innerText = updatedFinalAmount.toLocaleString() + "원";
-
-    const payButton = document.getElementById('payment-button');
-    if (payButton) payButton.innerText = updatedFinalAmount.toLocaleString() + "원 결제하기";
-
-    // 토스 위젯 금액 갱신
-    if (widgets) {
-        await widgets.setAmount({
-            currency: "KRW",
-            value: updatedFinalAmount
-        });
-    }
-};
+        // 토스 위젯 업데이트
+        if (widgets) {
+            await widgets.setAmount({
+                currency: "KRW",
+                value: updatedFinalAmount
+            });
+        }
+    };
 
     // [결제 요청 함수 - 에러 해결 지점]
     window.requestPayment = async function() {
