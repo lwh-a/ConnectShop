@@ -46,7 +46,8 @@
                     </div>
 
                     {% if g.user %}
-                    <div class="m-user-join-date">가입일 · {{ g.user.join_date.strftime('%Y.%m.%d') if g.user.join_date else '-' }}</div>
+                    <div class="m-user-join-date">가입일 · {{ g.user.join_date.strftime('%Y.%m.%d') if g.user.join_date
+                        else '-' }}</div>
                     <div class="m-action-links">
                         <a href="{{ url_for('auth.me') }}" class="m-edit-link">정보수정 ></a>
                         <span class="m-divider">|</span>
@@ -65,9 +66,9 @@
                 <div class="m-data-value">
                     {# g.user가 있고 멤버십이 활성화된 경우만 표시 #}
                     {% if g.user and g.user.is_membership %}
-                        <span style="color: #007bff; font-weight: bold;">커넥션 Care+ 활성</span>
+                    <span style="color: #007bff; font-weight: bold;">커넥션 Care+ 활성</span>
                     {% else %}
-                        <span style="color: #868e96; font-size: 0.9rem;">미가입</span>
+                    <span style="color: #868e96; font-size: 0.9rem;">미가입</span>
                     {% endif %}
                 </div>
             </div>
@@ -76,14 +77,15 @@
                 <div class="m-data-label">배송 혜택</div>
                 <div class="m-data-value">
                     {% if g.user and g.user.is_membership %}
-                        <span style="color: #007bff; font-weight: bold;">무제한 무료</span>
+                    <span style="color: #007bff; font-weight: bold;">무제한 무료</span>
                     {% else %}
-                        <span style="font-size: 0.9rem; color: #212529;">일반 배송</span>
+                    <span style="font-size: 0.9rem; color: #212529;">일반 배송</span>
                     {% endif %}
                 </div>
             </div>
 
-            <a href="{{ url_for('auth.coupons') }}" class="m-grid-item m-data-box coupon-info-box" style="text-decoration: none; color: inherit; display: block;">
+            <a href="{{ url_for('auth.coupons') }}" class="m-grid-item m-data-box coupon-info-box"
+                style="text-decoration: none; color: inherit; display: block;">
                 <div class="m-data-label">보유 쿠폰</div>
                 <div class="m-data-value">
                     <strong style="color:red;">{{ coupon_count or 0 }}</strong> 장
@@ -99,7 +101,8 @@
         </div>
 
         <div class="status-bar">
-            <a href="{{ url_for('order._list') }}" class="status-item" style="text-decoration: none; color: inherit; display: flex; flex-direction: column; align-items: center;">
+            <a href="{{ url_for('order._list') }}" class="status-item"
+                style="text-decoration: none; color: inherit; display: flex; flex-direction: column; align-items: center;">
                 <div class="icon-box">
                     <img src="{{ url_for('static', filename='images/mp/a1.png') }}" alt="주문 아이콘" width="24" height="24">
                 </div>
@@ -107,9 +110,11 @@
                 <span class="status-count">0</span>
             </a>
             <div class="status-item">
-                <a href="{{ url_for('order.my_orders') }}" style="text-decoration: none; color: inherit; display: contents;">
+                <a href="{{ url_for('order.my_orders') }}"
+                    style="text-decoration: none; color: inherit; display: contents;">
                     <div class="icon-box">
-                        <img src="{{ url_for('static', filename='images/mp/b1.png') }}" alt="배송 아이콘" width="24" height="24">
+                        <img src="{{ url_for('static', filename='images/mp/b1.png') }}" alt="배송 아이콘" width="24"
+                            height="24">
                     </div>
                     <span class="status-label">배송중</span>
                     <span class="status-count">{{ shipping_count }}</span>
@@ -139,35 +144,36 @@
         </div>
 
         <section>
-          <div class="section-title">
-            <h3>나의 제품 관리</h3>
-            <span class="view-all">
-              <a href="{{ url_for('order.my_orders') }}">전체보기</a>
-            </span>
-          </div>
+            <div class="section-title">
+                <h3>나의 제품 관리</h3>
+                <span class="view-all">
+                    <a href="{{ url_for('order.my_orders') }}">전체보기</a>
+                </span>
+            </div>
 
-          {% if confirmed_products %}
+            {% if confirmed_products %}
             <div class="register-banner product-area">
-              <div class="my-product-grid">
-                {% for product in confirmed_products %}
-                  <div class="my-product-item">
-                    <a href="{{ url_for('product.page', product_id=product.id) }}">
-                      <img class="my-product-img"
-                           src="{{ url_for('static', filename='images/menu/' ~ product.image_path) }}"
-                           alt="{{ product.name }}">
-                      <p class="my-product-name">{{ product.name }}</p>
-                    </a>
-                  </div>
-                {% endfor %}
-              </div>
+                <div class="my-product-grid">
+                    {% for product in confirmed_products %}
+                    <div class="my-product-item">
+                        <a href="{{ url_for('product.page', product_id=product.id) }}">
+                            <img class="my-product-img"
+                                src="{{ url_for('static', filename='images/menu/' ~ product.image_path) }}"
+                                alt="{{ product.name }}">
+                            <p class="my-product-name">{{ product.name }}</p>
+                        </a>
+                    </div>
+                    {% endfor %}
+                </div>
             </div>
-          {% else %}
+            {% else %}
             <div class="register-banner">
-              <p>제품을 직접 등록하고 편리한 서비스를 만나보세요</p>
-              <a href="#" class="btn-reg">등록하기</a>
+                <p>제품을 직접 등록하고 편리한 서비스를 만나보세요</p>
+                <a href="#" class="btn-reg">등록하기</a>
             </div>
-          {% endif %}
+            {% endif %}
         </section>
+
 
 
 
@@ -175,59 +181,27 @@
             <div class="section-title">
                 <h3>{{ g.user.username if g.user else '고객' }}님을 위한 맞춤 제품</h3>
             </div>
+
             <div class="product-scroll">
-                <div class="product-card">
+                {% for product in recommended_products %}
+                <div class="product-card" onclick="location.href='{{ url_for('product.page', product_id=product.id) }}'"
+     style="cursor:pointer;">
                     <div class="product-img">
-                        <img src="/static/images/menu/phone1.jpg" alt="추천 제품 01">
+                        <img src="/static/images/menu/{{ product.image_path }}" alt="{{ product.name }}">
                     </div>
+
                     <div class="p-info">
-                        <span class="brand">삼성전자</span>
-                        <span class="name">갤럭시S26 울트라</span>
-                        <span class="price">2,050,000원</span>
+                        <span class="brand">{{ product.brand }}</span>
+                        <span class="name">{{ product.name }}</span>
+                        <span class="price">
+                            {{ "{:,.0f}".format(product.price) }}원
+                        </span>
                     </div>
                 </div>
-                <div class="product-card">
-                    <div class="product-img">
-                        <img src="/static/images/menu/notebook1.jpg" alt="추천 제품 02">
-                    </div>
-                    <div class="p-info">
-                        <span class="brand">삼성전자</span>
-                        <span class="name">갤럭시북5 프로</span>
-                        <span class="price">3,229,000원</span>
-                    </div>
-                </div>
-                <div class="product-card">
-                    <div class="product-img">
-                        <img src="/static/images/menu/headphone2.jpg" alt="추천 제품 03">
-                    </div>
-                    <div class="p-info">
-                        <span class="brand">APPLE</span>
-                        <span class="name">에어팟 맥스 USB-C</span>
-                        <span class="price">549,550원</span>
-                    </div>
-                </div>
-                <div class="product-card">
-                    <div class="product-img">
-                        <img src="/static/images/menu/ear1.jpg" alt="추천 제품 04">
-                    </div>
-                    <div class="p-info">
-                        <span class="brand">삼성전자</span>
-                        <span class="name">갤럭시 버즈4 프로</span>
-                        <span class="price">356,990원</span>
-                    </div>
-                </div>
-                <div class="product-card">
-                    <div class="product-img">
-                        <img src="/static/images/menu/ear2.jpg" alt="추천 제품 05">
-                    </div>
-                    <div class="p-info">
-                        <span class="brand">APPLE</span>
-                        <span class="name">에어팟 프로3 </span>
-                        <span class="price">319,990원</span>
-                    </div>
-                </div>
+                {% endfor %}
             </div>
         </section>
+
     </div>
 </div>
 
