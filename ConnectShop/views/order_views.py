@@ -2,7 +2,6 @@ import base64
 import requests
 
 from datetime import timedelta, datetime
-from types import SimpleNamespace
 from flask import Blueprint, render_template, redirect, url_for, session, g, flash, jsonify, request
 
 from ConnectShop import db
@@ -84,9 +83,24 @@ def get_cart_items():
     return cart_list
 
 
+# 🌟 팀원분의 장바구니 최적화 로직 유지
+def cleanup_old_carts():
+    # 현재 시간으로부터 30일 전 시간 계산
+    limit_date = datetime.utcnow() - timedelta(days=30)
+
+    # 30일이 지난 회원 장바구니 아이템 삭제
+    expired_items = Cart.query.filter(Cart.created_at < limit_date).all()
+    for item in expired_items:
+        db.session.delete(item)
+    db.session.commit()
+
+
 # --- Routes ---
 @bp.route('/list')
 def _list():
+    if g.user:
+        cleanup_old_carts()
+
     cart_list = get_cart_items()
 
     if cart_list:
@@ -138,6 +152,7 @@ def add(product_id):
         db.session.commit()
     else:
         guest_cart = get_guest_cart()
+        session.permanent = True
         found = False
         for item in guest_cart:
             if item['product_id'] == product_id and item.get('options', "").strip() == selected_options:
@@ -158,10 +173,19 @@ def add(product_id):
         total_count = sum(item.quantity for item in current_cart_list)
         product_total_val = sum(item.price * item.quantity for item in current_cart_list)
 
+        shipping_fee = 3000
+        if product_total_val == 0 or (g.user and getattr(g.user, 'is_membership', False)):
+            shipping_fee = 0
+        final_total = product_total_val + shipping_fee
+
         return jsonify({
             'success': True,
             'cart_count': total_count,
-            'total_price': "{:,}".format(product_total_val)
+            'pure_total': "{:,}".format(product_total_val),
+            'total_price': "{:,}".format(final_total),
+            'shipping_fee': "{:,}".format(shipping_fee),
+            'raw_pure_total': product_total_val,
+            'raw_total_price': final_total
         })
 
     return redirect(url_for('order._list'))
@@ -292,17 +316,33 @@ def modify(cart_id, action):
 @bp.route('/delete/<int:cart_id>')
 def delete(cart_id):
     if g.user:
-        cart_item = Cart.query.get(cart_id)
-
+        cart_item = db.session.get(Cart, cart_id)
         if cart_item and cart_item.user_id == g.user.id:
             db.session.delete(cart_item)
             db.session.commit()
     else:
         guest_cart = get_guest_cart()
-
         if 0 <= cart_id < len(guest_cart):
             guest_cart.pop(cart_id)
             save_guest_cart(guest_cart)
+
+    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        cart_list = get_cart_items()
+        pure_total = sum(item.price * item.quantity for item in cart_list)
+        total_count = sum(item.quantity for item in cart_list)
+
+        shipping_fee = 3000
+        if pure_total == 0 or (g.user and getattr(g.user, 'is_membership', False)):
+            shipping_fee = 0
+
+        return jsonify({
+            "success": True,
+            "pure_total": format(pure_total, ','),
+            "total_price": format(pure_total + shipping_fee, ','),
+            "cart_count": total_count,
+            "raw_pure_total": pure_total,
+            "raw_total_price": pure_total + shipping_fee
+        })
 
     return redirect(url_for('order._list'))
 
@@ -363,136 +403,157 @@ def checkout():
                            pre_selected_coupon_id=coupon_id)
 
 
-# =======================================================
-# 🌟 [업데이트 1] 포인트 정보까지 임시 저장
-# =======================================================
+# 🌟 [병합 완료] 팀장님의 '사용 포인트' + 팀원분의 '적립금 및 현금영수증' 완벽 통합
 @bp.route('/save_temp_info', methods=['POST'])
 def save_temp_info():
     data = request.get_json()
+
+    print("=" * 50)
+    print(f"브라우저에서 넘어온 통합 데이터: {data}")
+    print("=" * 50)
+
+    # 1. 배송 정보
     session['temp_recipient'] = data.get('recipient')
     session['temp_phone'] = data.get('phone')
     session['temp_address'] = data.get('address')
-    session['applied_coupon_id'] = data.get('coupon_id')
     session['temp_memo'] = data.get('memo')
+    
+    # 2. 현금영수증 정보 (팀원분)
+    session['cash_receipt_apply'] = data.get('cash_receipt_apply', False)
+    session['cash_receipt_type'] = data.get('cash_receipt_type')
+    session['cash_receipt_number'] = data.get('cash_receipt_number')
 
-    # 🌟 프론트엔드에서 넘긴 사용 포인트 저장!
-    session['temp_used_point'] = data.get('used_point', 0)
+    # 3. 쿠폰 및 리워드/포인트 정보 (양측 통합)
+    session['applied_coupon_id'] = data.get('coupon_id')
+    session['temp_used_point'] = data.get('used_point', 0)  # 팀장님 포인트 사용
+    session['calculated_reward_point'] = data.get('reward_point', 0)  # 팀원분 리워드 박제
 
     return jsonify({"success": True})
 
 
-# =======================================================
-# 🌟 [업데이트 2] 결제 성공 시 실제 포인트 차감 및 보너스 적립!
-# =======================================================
+# 🌟 [병합 완료] 무통장 분기처리 + 포인트/보너스 처리 완벽 통합!
 @bp.route('/success')
 def success():
+    # --- [데이터 수집] ---
+    payment_type = request.args.get('paymentType')
     payment_key = request.args.get('paymentKey')
     order_id = request.args.get('orderId')
     amount = request.args.get('amount')
 
+    # --- [변수 초기화] ---
+    cart_items = get_cart_items()
     coupon_id = session.get('applied_coupon_id')
-    used_point = int(session.get('temp_used_point', 0))  # 🌟 사용한 포인트 가져오기
+    used_point = int(session.get('temp_used_point', 0))
+    reward_point = int(session.get('calculated_reward_point', 0))
+    
+    is_success = False
+    res_data = {}
+    payment_method_used = '무통장입금' # 기본값
 
-    secret_key = "test_gsk_docs_OaPz8L5KdmQXkzRz3y47BMw6" + ":"
-    encoded_key = base64.b64encode(secret_key.encode()).decode()
-    url = "https://api.tosspayments.com/v1/payments/confirm"
-    headers = {"Authorization": f"Basic {encoded_key}", "Content-Type": "application/json"}
+    # --- [결제 승인 로직 (팀원 분기처리 적용)] ---
+    if payment_type == 'VBANK':
+        is_success = True
+        payment_method_used = '무통장입금'
+    else:
+        secret_key = "test_gsk_docs_OaPz8L5KdmQXkzRz3y47BMw6" + ":"
+        encoded_key = base64.b64encode(secret_key.encode()).decode()
+        url = "https://api.tosspayments.com/v1/payments/confirm"
+        headers = {"Authorization": f"Basic {encoded_key}", "Content-Type": "application/json"}
 
-    response = requests.post(url, json={
-        "paymentKey": payment_key, "orderId": order_id, "amount": amount
-    }, headers=headers)
+        try:
+            response = requests.post(url, json={
+                "paymentKey": payment_key, "orderId": order_id, "amount": amount
+            }, headers=headers)
+            res_data = response.json()
+            if response.status_code == 200:
+                is_success = True
+                payment_method_used = res_data.get('method', '카드/간편결제')
+            else:
+                flash(f"결제 승인 실패: {res_data.get('message')}")
+                return redirect(url_for('order.checkout'))
+        except Exception as e:
+            flash(f"통신 오류: {str(e)}")
+            return redirect(url_for('order.checkout'))
 
-    res_data = response.json()
-
-    if response.status_code == 200:
+    # --- [결제 성공 후 DB 작업 (통합)] ---
+    if is_success:
         # 1. 쿠폰 처리
-        discount_amount = 0
-        coupon = None
+        applied_coupon = None
         if coupon_id and g.user:
-            coupon = Coupon.query.filter_by(id=coupon_id, user_id=g.user.id, is_used=False).first()
-            if coupon:
-                discount_amount = coupon.discount_amount
-                coupon.is_used = True
-                coupon.used_date = datetime.now()
+            applied_coupon = Coupon.query.filter_by(id=coupon_id, user_id=g.user.id, is_used=False).first()
 
-        memo = session.get('temp_memo')
-        payment_method_used = res_data.get('method', '카드/간편결제')  # 🌟 진짜 결제수단
-
-        cart_items = get_cart_items()
-        pure_product_total = sum(item.price * item.quantity for item in cart_items)
-
-        # 2. 멤버십 3% 적립 계산 (사용한 포인트는 빼고 계산)
-        reward_point = 0
-        if g.user and g.user.is_membership:
-            discount = coupon.discount_amount if coupon else 0
-            reward_base = pure_product_total - discount - used_point  # 🌟 포인트 쓴 금액 제외
-            reward_point = int(max(0, reward_base) * 0.03)
-
-        # 🌟 3. [이벤트] 퀵계좌이체/가상계좌 결제 시 결제액의 3% 보너스 추가 적립!
-        if payment_method_used in ['계좌이체', '가상계좌']:
+        # 2. 적립금 재확인 및 계좌이체(무통장) 3% 보너스 적용! (팀장님 로직 융합)
+        if payment_method_used in ['계좌이체', '가상계좌', '무통장입금']:
             bonus_point = int(int(amount) * 0.03)
             reward_point += bonus_point
-            print(f"--- [보너스 적립] 계좌이체 3% 적용: +{bonus_point}원")
+            print(f"--- [보너스 적립] 현금성 결제 3% 추가 적용: +{bonus_point}원")
 
-        # 🌟 4. [포인트 차감] 유저 지갑에서 실제로 포인트 빼기
+        # 3. [포인트 차감] 유저 지갑에서 실제로 포인트 빼기
         if g.user and used_point > 0:
-            actual_used_point = min(g.user.point, used_point)  # 방어 로직
+            actual_used_point = min(g.user.point, used_point)
             g.user.point -= actual_used_point
             used_point = actual_used_point
 
-        # 5. 주문 객체 생성
+        # 4. 주문(Order) 객체 생성 (현금영수증, 포인트 상태 완벽 기록)
+        order_status = '입금대기' if payment_type == 'VBANK' else '결제완료'
         order = Order(
             user_id=g.user.id if g.user else None,
             recipient=session.get('temp_recipient'),
             phone=session.get('temp_phone'),
             address=session.get('temp_address'),
-            memo=memo,
+            memo=session.get('temp_memo'),
             total_price=int(amount),
             reward_point=reward_point,
             is_point_paid=False,
-            payment_method=payment_method_used,  # 🌟 토스가 알려준 진짜 수단 저장
-            status='결제완료',
+            payment_method=payment_method_used,
+            status=order_status,
             coupon_id=coupon_id,
-            used_point=used_point  # 🌟 DB 영수증에 쓴 포인트 기록!
+            used_point=used_point,
+            cash_receipt_apply=session.get('cash_receipt_apply', False),
+            cash_receipt_type=session.get('cash_receipt_type'),
+            cash_receipt_number=session.get('cash_receipt_number')
         )
 
-        db.session.add(order)
-        db.session.commit()
+        if applied_coupon:
+            applied_coupon.is_used = True
+            applied_coupon.used_date = datetime.now()
 
-        # 6. 아이템 생성 및 재고 차감
-        cart_items = get_cart_items()
-        for cart in cart_items:
+        db.session.add(order)
+        db.session.flush() # order.id 생성을 위해 flush
+
+        # 5. 주문 상세 내역(OrderItem) 및 재고 차감
+        for item in cart_items:
             order_item = OrderItem(
                 order_id=order.id,
-                product_id=cart.product.id,
-                quantity=cart.quantity,
-                price=cart.price,
-                selected_options=cart.selected_options
+                product_id=item.product.id,
+                quantity=item.quantity,
+                price=item.price,
+                selected_options=getattr(item, 'selected_options', '')
             )
             db.session.add(order_item)
 
-            product = db.session.get(Product, cart.product.id)
+            product = db.session.get(Product, item.product.id)
             if product:
-                product.stock -= cart.quantity
+                product.stock -= item.quantity
 
-        # 7. 장바구니 비우기 및 세션 정리
+        # 6. 장바구니 비우기 및 세션 완전 정리
         if g.user:
             Cart.query.filter_by(user_id=g.user.id).delete()
         else:
             session.pop('guest_cart', None)
 
-        session.pop('applied_coupon_id', None)
-        session.pop('temp_recipient', None)
-        session.pop('temp_phone', None)
-        session.pop('temp_address', None)
-        session.pop('temp_memo', None)
-        session.pop('temp_used_point', None)  # 🌟 포인트 세션도 삭제
+        keys_to_pop = [
+            'applied_coupon_id', 'calculated_reward_point', 'temp_recipient',
+            'temp_phone', 'temp_address', 'temp_memo', 'cash_receipt_apply',
+            'cash_receipt_type', 'cash_receipt_number', 'temp_used_point'
+        ]
+        for key in keys_to_pop:
+            session.pop(key, None)
 
         db.session.commit()
-
         return render_template('order/order_complete.html', order=order, order_id=order.id)
     else:
-        flash(f"결제 승인 실패: {res_data.get('message')}")
+        flash("결제에 실패하였습니다.")
         return redirect(url_for('order.checkout'))
 
 
@@ -531,7 +592,8 @@ def place_order():
             order=new_order,
             product_id=item.product.id,
             quantity=item.quantity,
-            price=item.product.price
+            price=item.price,
+            selected_options=getattr(item, 'selected_options', '')
         )
         db.session.add(order_item)
 
@@ -629,9 +691,6 @@ def order_detail(order_id):
     return render_template('order/order_detail.html', order=order, can_refund=can_refund)
 
 
-# =======================================================
-# 🌟 [업데이트 3] 결제 취소 시 사용했던 포인트 돌려주기!
-# =======================================================
 @bp.route('/order/cancel/<int:order_id>', methods=['POST'])
 def cancel_order(order_id):
     order = Order.query.get_or_404(order_id)
@@ -650,7 +709,7 @@ def cancel_order(order_id):
         flash("취소 권한이 없습니다. 정보가 일치하는지 확인하세요.")
         return redirect(request.referrer or url_for('main.index'))
 
-    if order.status == '결제완료':
+    if order.status in ['결제완료', '입금대기']:
         for item in order.items:
             product = Product.query.get(item.product_id)
             if product:
@@ -662,7 +721,6 @@ def cancel_order(order_id):
                 coupon.is_used = False
                 coupon.used_date = None
 
-        # 🌟 [포인트 복구] 취소한 사람이 회원이고 쓴 포인트가 있다면 돌려줌!
         if g.user and hasattr(order, 'used_point') and order.used_point > 0:
             g.user.point += order.used_point
             print(f"--- [포인트 복구] {order.used_point}원이 다시 반환되었습니다.")
@@ -671,7 +729,7 @@ def cancel_order(order_id):
         db.session.commit()
         flash(f"주문 #{order_id}번 건이 정상적으로 취소되었습니다.")
     else:
-        flash("이미 배송 중이거나 취소된 주문은 처리할 수 없습니다.")
+        flash(f"현재 상태('{order.status}')에서는 취소할 수 없습니다. 이미 배송 중이거나 취소된 주문인지 확인해주세요.")
 
     return redirect(url_for('order.order_detail', order_id=order_id))
 
