@@ -264,7 +264,9 @@
                             <a class="nav-link fs-5" href="#" id="searchTrigger"><i class="bi bi-search"></i></a>
                         </li>
                         <li class="nav-item me-2">
-                            <a class="nav-link fs-5" href="{{ url_for('order._list') }}" id="cartTrigger"><i class="bi bi-bag"></i></a>
+                            <a class="nav-link fs-5" href="javascript:void(0);" id="cartTrigger">
+                                <i class="bi bi-bag"></i>
+                            </a>
                         </li>
 
                         <li class="nav-item dropdown">
@@ -273,15 +275,16 @@
                                 <i class="bi bi-person"></i>
                             </a>
 
-                            <ul class="dropdown-menu dropdown-menu-end py-2" aria-labelledby="myPageDropdown">
+                            <ul class="dropdown-menu dropdown-menu-end py-2 shadow-sm border-0" aria-labelledby="myPageDropdown">
 
                                 {% if g.user %}
-                                <li class="px-3 py-1">
-                                    <strong>{{ g.user.username }}</strong> 님
+                                <li class="px-3 py-2 text-center border-bottom mb-2" style="background-color: #f8f9fa;">
+                                    <strong class="text-dark">{{ g.user.username }} 님</strong>
+                                    <div class="mt-1" style="font-size: 0.85rem; color: #ff9500; font-weight: 700;">
+                                        <i class="bi bi-p-circle-fill me-1"></i>{{ "{:,}".format(g.user.point) }} P
+                                    </div>
                                 </li>
-                                <li>
-                                    <hr class="dropdown-divider">
-                                </li>
+
                                 <li>
                                     <a class="dropdown-item" href="{{ url_for('auth.mypage') }}">마이페이지</a>
                                 </li>
@@ -292,7 +295,10 @@
                                     <a class="dropdown-item" href="{{ url_for('order.my_orders') }}">주문/배송조회</a>
                                 </li>
                                 <li>
-                                    <a class="dropdown-item" href="{{ url_for('auth.logout') }}">
+                                    <hr class="dropdown-divider">
+                                </li>
+                                <li>
+                                    <a class="dropdown-item text-danger fw-bold" href="{{ url_for('auth.logout') }}">
                                         로그아웃
                                     </a>
                                 </li>
@@ -561,6 +567,14 @@
             const qtySpan = document.querySelector(`.qty-item-${cartId}`);
             if (!qtySpan) return;
 
+            const currentQty = parseInt(qtySpan.innerText);
+            if (action === 'dec' && currentQty === 1) {
+                // 사용자에게 확인을 받고, '취소'를 누르면 함수 종료
+                if (!confirm("상품을 장바구니에서 삭제하시겠습니까?")) {
+                    return;
+                }
+            }
+
             try {
                 const response = await fetch(`/order/modify/${cartId}/${action}`, {
                     method: 'POST',
@@ -627,7 +641,42 @@
             }
         }
 
+        async function deleteCartItem(cartId) {
+            if (!confirm("장바구니에서 삭제하시겠습니까?")) return;
 
+            try {
+                const response = await fetch(`/order/delete/${cartId}`, {
+                    method: 'GET', // 기존 라우트가 GET 방식이므로 GET 유지
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                });
+
+                if (response.ok) {
+                    // 1. 화면에서 해당 아이템 요소 삭제
+                    const itemElement = document.getElementById(`cart-item-${cartId}`);
+                    if (itemElement) {
+                        itemElement.remove();
+                    }
+
+                    // 2. 장바구니 요약 정보(합계 금액 등) 갱신
+                    // 이미 만들어두신 updateTotalAmount() 함수가 있다면 여기서 호출하세요.
+                    if (typeof updateTotalAmount === 'function') {
+                        updateTotalAmount();
+                    }
+
+                    // 3. 만약 아이템이 하나도 없으면 페이지를 새로고침해서 '장바구니가 비었습니다' 표시
+                    if (document.querySelectorAll('.cart-item-row').length === 0) {
+                        location.reload();
+                    }
+                } else {
+                    alert("삭제 처리에 실패했습니다.");
+                }
+            } catch (error) {
+                console.error("Error:", error);
+                alert("오류가 발생했습니다.");
+            }
+        }
 
     </script>
 
