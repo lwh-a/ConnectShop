@@ -766,53 +766,218 @@ with app.app_context():
     print("📦 상품 기본 데이터 생성 완료, 옵션 매칭 시작...")
 
     # 2. 제품별 상세 옵션(ProductOption) 생성
+    # options = [
+    #     # --- 갤럭시 S26 울트라 (p1) ---
+    #     ProductOption(product_id=p1.id, otype='모델', oname='갤럭시 S26 울트라 (174.9mm)', add_price=0),
+    #     ProductOption(product_id=p1.id, otype='용량', oname='256GB ㅣ 12GB', add_price=0),
+    #     ProductOption(product_id=p1.id, otype='용량', oname='512GB ㅣ 12GB', add_price=253000),
+    #     ProductOption(product_id=p1.id, otype='용량', oname='1TB ㅣ 16GB', add_price=748000),
+    #     ProductOption(product_id=p1.id, otype='색상', oname='핑크 골드', color_code='#F1DDCF',
+    #                   image_variant='phone1_pink.jpg'),
+    #     ProductOption(product_id=p1.id, otype='색상', oname='실버 쉐도우', color_code='#C0C0C0',
+    #                   image_variant='phone1_silver.jpg'),
+    #     ProductOption(product_id=p1.id, otype='색상', oname='블랙', color_code='#000000', image_variant='phone1_black.jpg'),
+    #     ProductOption(product_id=p1.id, otype='색상', oname='블루', color_code='#A2B5CD', image_variant='phone1_blue.jpg'),
+    #
+    #     # --- 애플 에어팟 (p2) - 케이스 옵션 예시 ---
+    #     ProductOption(product_id=p2.id, otype='모델', oname='유선 충전 모델', add_price=0),
+    #     ProductOption(product_id=p2.id, otype='모델', oname='MagSafe 충전 모델', add_price=50000),
+    #
+    #     # --- 소니 WH 헤드폰 (p3) ---
+    #     ProductOption(product_id=p3.id, otype='색상', oname='플래티넘 실버', color_code='#E5E5E5',
+    #                   image_variant='headphone1_silver.jpg'),
+    #     ProductOption(product_id=p3.id, otype='색상', oname='블랙', color_code='#1A1A1A',
+    #                   image_variant='headphone1_black.jpg'),
+    #     ProductOption(product_id=p3.id, otype='색상', oname='미드나잇 블루', color_code='#191970',
+    #                   image_variant='headphone1_blue.jpg'),
+    #
+    #     # --- 맥북 에어 M3 (p4) ---
+    #     ProductOption(product_id=p4.id, otype='모델', oname='13 모델', add_price=0),
+    #     ProductOption(product_id=p4.id, otype='모델', oname='15 모델', add_price=300000),
+    #     ProductOption(product_id=p4.id, otype='색상', oname='스타라이트', color_code='#F0EAD6',
+    #                   image_variant='notebook2_starlight.jpg'),
+    #     ProductOption(product_id=p4.id, otype='색상', oname='미드나잇', color_code='#2C3539',
+    #                   image_variant='notebook2_midnight.jpg'),
+    #     ProductOption(product_id=p4.id, otype='칩셋', oname='8코어 GPU', add_price=0),
+    #     ProductOption(product_id=p4.id, otype='칩셋', oname='10코어 GPU', add_price=150000),
+    #
+    #     # --- 갤럭시 워치 8 (p5) ---
+    #     ProductOption(product_id=p5.id, otype='모델', oname='갤럭시 워치8', add_price=0),
+    #     ProductOption(product_id=p5.id, otype='모델', oname='갤럭시 워치8 클래식', add_price=100000),
+    #     ProductOption(product_id=p5.id, otype='크기', oname='40mm', add_price=0),
+    #     ProductOption(product_id=p5.id, otype='크기', oname='44mm', add_price=50000),
+    #     ProductOption(product_id=p5.id, otype='색상', oname='그라파이트', color_code='#383838',
+    #                   image_variant='watch1_graphite.jpg'),
+    #     ProductOption(product_id=p5.id, otype='색상', oname='실버', color_code='#C0C0C0',
+    #                   image_variant='watch1_silver.jpg'),
+    # ]
+
+    # 1. 초기화 (기존 데이터가 꼬이지 않도록)
+    ProductOption.query.delete()
+    db.session.commit()
+
     options = [
-        # --- 갤럭시 S26 울트라 (p1) ---
+        # --- [기존 메인 제품] 사용자님이 직접 작성한 상세 옵션 유지 ---
         ProductOption(product_id=p1.id, otype='모델', oname='갤럭시 S26 울트라 (174.9mm)', add_price=0),
         ProductOption(product_id=p1.id, otype='용량', oname='256GB ㅣ 12GB', add_price=0),
         ProductOption(product_id=p1.id, otype='용량', oname='512GB ㅣ 12GB', add_price=253000),
         ProductOption(product_id=p1.id, otype='용량', oname='1TB ㅣ 16GB', add_price=748000),
-        ProductOption(product_id=p1.id, otype='색상', oname='핑크 골드', color_code='#F1DDCF',
-                      image_variant='phone1_pink.jpg'),
-        ProductOption(product_id=p1.id, otype='색상', oname='실버 쉐도우', color_code='#C0C0C0',
-                      image_variant='phone1_silver.jpg'),
-        ProductOption(product_id=p1.id, otype='색상', oname='블랙', color_code='#000000', image_variant='phone1_black.jpg'),
-        ProductOption(product_id=p1.id, otype='색상', oname='블루', color_code='#A2B5CD', image_variant='phone1_blue.jpg'),
+        ProductOption(product_id=p1.id, otype='색상', oname='핑크 골드', color_code='#F1DDCF'),
+        ProductOption(product_id=p1.id, otype='색상', oname='실버 쉐도우', color_code='#C0C0C0'),
+        ProductOption(product_id=p1.id, otype='색상', oname='블랙', color_code='#000000'),
 
-        # --- 애플 에어팟 (p2) - 케이스 옵션 예시 ---
         ProductOption(product_id=p2.id, otype='모델', oname='유선 충전 모델', add_price=0),
         ProductOption(product_id=p2.id, otype='모델', oname='MagSafe 충전 모델', add_price=50000),
+        ProductOption(product_id=p2.id, otype='추가구성', oname='선택 안함 (본품만)', add_price=0),
+        ProductOption(product_id=p2.id, otype='추가구성', oname='충전 케이스 보호 커버(클리어)', add_price=9900),
+        ProductOption(product_id=p2.id, otype='분실보장', oname='가입 안함', add_price=0),
+        ProductOption(product_id=p2.id, otype='분실보장', oname='유닛 한쪽 분실 보장 플랜', add_price=15000),
 
-        # --- 소니 WH 헤드폰 (p3) ---
-        ProductOption(product_id=p3.id, otype='색상', oname='플래티넘 실버', color_code='#E5E5E5',
-                      image_variant='headphone1_silver.jpg'),
-        ProductOption(product_id=p3.id, otype='색상', oname='블랙', color_code='#1A1A1A',
-                      image_variant='headphone1_black.jpg'),
-        ProductOption(product_id=p3.id, otype='색상', oname='미드나잇 블루', color_code='#191970',
-                      image_variant='headphone1_blue.jpg'),
+        ProductOption(product_id=p3.id, otype='모델', oname='소니 WH 헤드폰', add_price=0),
+        ProductOption(product_id=p3.id, otype='색상', oname='새틴 블랙', color_code='#28282B', add_price=0),
+        ProductOption(product_id=p3.id, otype='색상', oname='클라우드 화이트', color_code='#F5F5F5', add_price=0),
+        ProductOption(product_id=p3.id, otype='추가구성', oname='기본 패키지', add_price=0),
+        ProductOption(product_id=p3.id, otype='추가구성', oname='고급 가죽 스탠드', add_price=35000),
+        ProductOption(product_id=p3.id, otype='보증연장', oname='기본 1년 보증', add_price=0),
+        ProductOption(product_id=p3.id, otype='보증연장', oname='Connect Care+ (2년)', add_price=45000),
 
-        # --- 맥북 에어 M3 (p4) ---
-        ProductOption(product_id=p4.id, otype='모델', oname='13 모델', add_price=0),
-        ProductOption(product_id=p4.id, otype='모델', oname='15 모델', add_price=300000),
-        ProductOption(product_id=p4.id, otype='색상', oname='스타라이트', color_code='#F0EAD6',
-                      image_variant='notebook2_starlight.jpg'),
-        ProductOption(product_id=p4.id, otype='색상', oname='미드나잇', color_code='#2C3539',
-                      image_variant='notebook2_midnight.jpg'),
+
+        ProductOption(product_id=p4.id, otype='모델', oname='13형 모델', add_price=0),
+        ProductOption(product_id=p4.id, otype='모델', oname='15형 모델', add_price=300000),
+        ProductOption(product_id=p4.id, otype='색상', oname='스타라이트', color_code='#F0EAD6'),
         ProductOption(product_id=p4.id, otype='칩셋', oname='8코어 GPU', add_price=0),
         ProductOption(product_id=p4.id, otype='칩셋', oname='10코어 GPU', add_price=150000),
+        ProductOption(product_id=p4.id, otype='OS 선택', oname='Free DOS (윈도우 미설치)', add_price=0),
+        ProductOption(product_id=p4.id, otype='OS 선택', oname='Windows 11 Home 설치', add_price=189000),
 
-        # --- 갤럭시 워치 8 (p5) ---
-        ProductOption(product_id=p5.id, otype='모델', oname='갤럭시 워치8', add_price=0),
-        ProductOption(product_id=p5.id, otype='모델', oname='갤럭시 워치8 클래식', add_price=100000),
-        ProductOption(product_id=p5.id, otype='크기', oname='40mm', add_price=0),
-        ProductOption(product_id=p5.id, otype='크기', oname='44mm', add_price=50000),
-        ProductOption(product_id=p5.id, otype='색상', oname='그라파이트', color_code='#383838',
-                      image_variant='watch1_graphite.jpg'),
-        ProductOption(product_id=p5.id, otype='색상', oname='실버', color_code='#C0C0C0',
-                      image_variant='watch1_silver.jpg'),
+        ProductOption(product_id=p5.id, otype='모델', oname='갤럭시 워치 8', add_price=0),
+        ProductOption(product_id=p5.id, otype='크기', oname='40mm / 41mm (표준)', add_price=0),
+        ProductOption(product_id=p5.id, otype='크기', oname='44mm / 45mm (대형)', add_price=45000),
+        ProductOption(product_id=p5.id, otype='연결성', oname='GPS 전용', add_price=0),
+        ProductOption(product_id=p5.id, otype='연결성', oname='GPS + Cellular (LTE)', add_price=121000),
+        ProductOption(product_id=p5.id, otype='스트랩', oname='스포츠 밴드 (실리콘)', color_code='#2F4F4F', add_price=0),
+        ProductOption(product_id=p5.id, otype='스트랩', oname='밀레니즈 루프 (메탈)', color_code='#C0C0C0', add_price=65000),
+        ProductOption(product_id=p5.id, otype='스트랩', oname='가죽 링크 (브라운)', color_code='#8B4513', add_price=89000),
     ]
 
-    # 3. 옵션 일괄 추가 및 최종 커밋
+    # 2. [자동화] 나머지 수백 개 제품에도 풍성한 옵션 부여
+    all_categories = [
+        (other_smartphones, "스마트폰"),
+        (other_tablets, "태블릿"),
+        (other_notebooks, "노트북"),
+        (other_smartwatches, "스마트워치"),
+        (other_earphones, "무선이어폰"),
+        (other_headphones, "헤드폰"),
+        (other_speakers, "스피커")
+    ]
+
+    for products, cat_name in all_categories:
+        for p in products:
+            # p1~p5는 이미 위에서 넣었으니 중복 방지
+            if p.id in [p1.id, p2.id, p3.id, p4.id, p5.id]:
+                continue
+
+            # 모든 제품 기본 모델명 (페이지 구색용)
+            options.append(ProductOption(product_id=p.id, otype='모델', oname=f'{p.name}', add_price=0))
+
+            if cat_name in ['스마트폰', '태블릿']:
+                # [기존 로직 유지]
+                options.append(ProductOption(product_id=p.id, otype='용량', oname='128GB', add_price=0))
+                options.append(ProductOption(product_id=p.id, otype='용량', oname='256GB', add_price=150000))
+                options.append(ProductOption(product_id=p.id, otype='색상', oname='미드나잇 블랙', color_code='#1D1D1F'))
+                options.append(ProductOption(product_id=p.id, otype='색상', oname='스페이스 실버', color_code='#C0C0C0'))
+
+            elif cat_name == '노트북':
+                # 2. 프로세서 (CPU)
+                options.append(ProductOption(product_id=p.id, otype='프로세서', oname='기본 프로세서 모델', add_price=0))
+                options.append(ProductOption(product_id=p.id, otype='프로세서', oname='고성능 업그레이드 모델', add_price=350000))
+
+                # 3. RAM (메모리)
+                options.append(ProductOption(product_id=p.id, otype='RAM', oname='16GB 통합 메모리', add_price=0))
+                options.append(ProductOption(product_id=p.id, otype='RAM', oname='32GB 통합 메모리', add_price=200000))
+
+                # 4. 저장장치 (SSD)
+                options.append(ProductOption(product_id=p.id, otype='저장장치', oname='512GB SSD', add_price=0))
+                options.append(ProductOption(product_id=p.id, otype='저장장치', oname='1TB SSD', add_price=250000))
+
+                # 5. OS 및 소프트웨어
+                options.append(ProductOption(product_id=p.id, otype='OS 선택', oname='Free DOS (윈도우 미설치)', add_price=0))
+                options.append(
+                    ProductOption(product_id=p.id, otype='OS 선택', oname='Windows 11 Home 설치', add_price=189000))
+
+            elif cat_name == '스마트워치':
+                # 1. 케이스 크기 (가장 기본적인 가격 변동 요소)
+                # 보통 작은 사이즈를 기본으로, 큰 사이즈에 추가금을 붙입니다.
+                options.append(ProductOption(product_id=p.id, otype='크기', oname='40mm / 41mm (표준)', add_price=0))
+                options.append(ProductOption(product_id=p.id, otype='크기', oname='44mm / 45mm (대형)', add_price=45000))
+
+                # 2. 연결성 (GPS vs Cellular)
+                options.append(ProductOption(product_id=p.id, otype='연결성', oname='GPS 전용', add_price=0))
+                options.append(
+                    ProductOption(product_id=p.id, otype='연결성', oname='GPS + Cellular (LTE)', add_price=121000))
+
+                # 3. 스트랩/밴드 (디자인적 요소)
+                # 다양한 색상 코드를 넣어 UI에서 예쁘게 보이도록 합니다.
+                options.append(ProductOption(product_id=p.id, otype='스트랩', oname='스포츠 밴드 (실리콘)', color_code='#2F4F4F',
+                                             add_price=0))
+                options.append(ProductOption(product_id=p.id, otype='스트랩', oname='밀레니즈 루프 (메탈)', color_code='#C0C0C0',
+                                             add_price=65000))
+                options.append(ProductOption(product_id=p.id, otype='스트랩', oname='가죽 링크 (브라운)', color_code='#8B4513',
+                                             add_price=89000))
+
+                # 4. 보호 서비스 및 액세서리 (추가 구매 유도)
+                options.append(ProductOption(product_id=p.id, otype='액정 보호', oname='선택 안함', add_price=0))
+                options.append(ProductOption(product_id=p.id, otype='액정 보호', oname='고강도 강화유리 필름 부착', add_price=12900))
+
+                options.append(ProductOption(product_id=p.id, otype='충전기', oname='기본 케이블 포함', add_price=0))
+                options.append(ProductOption(product_id=p.id, otype='충전기', oname='급속 충전 도크 거치대 추가', add_price=35000))
+
+            elif cat_name == '헤드폰':
+                # 1. 색상
+                options.append(
+                    ProductOption(product_id=p.id, otype='색상', oname='새틴 블랙', color_code='#28282B', add_price=0))
+                options.append(
+                    ProductOption(product_id=p.id, otype='색상', oname='클라우드 화이트', color_code='#F5F5F5', add_price=0))
+                # 2. 추가 구성품
+                options.append(ProductOption(product_id=p.id, otype='추가구성', oname='기본 패키지', add_price=0))
+                options.append(ProductOption(product_id=p.id, otype='추가구성', oname='고급 가죽 스탠드', add_price=35000))
+                # 3. 보증
+                options.append(ProductOption(product_id=p.id, otype='보증연장', oname='기본 1년 보증', add_price=0))
+                options.append(
+                    ProductOption(product_id=p.id, otype='보증연장', oname='Connect Care+ (2년)', add_price=45000))
+
+            elif cat_name == '스피커':
+                # 1. 색상 (스피커는 좀 더 다양한 느낌으로)
+                options.append(
+                    ProductOption(product_id=p.id, otype='색상', oname='다크 그레이', color_code='#555555', add_price=0))
+                options.append(
+                    ProductOption(product_id=p.id, otype='색상', oname='샌드 베이지', color_code='#E1C699', add_price=0))
+                # 2. 연결 옵션 (학원 프로젝트용 기능 강조)
+                options.append(ProductOption(product_id=p.id, otype='연결패키지', oname='블루투스 단독', add_price=0))
+                options.append(ProductOption(product_id=p.id, otype='연결패키지', oname='AUX 케이블 포함', add_price=5000))
+                # 3. 액세서리
+                options.append(ProductOption(product_id=p.id, otype='액세서리', oname='선택 안함', add_price=0))
+                options.append(ProductOption(product_id=p.id, otype='액세서리', oname='전용 방수 파우치', add_price=19000))
+
+
+            elif cat_name == '무선이어폰':
+
+                # 1. 색상 선택 (필수)
+                options.append(
+                    ProductOption(product_id=p.id, otype='색상', oname='미스틱 화이트', color_code='#FFFFFF', add_price=0))
+                options.append(
+                    ProductOption(product_id=p.id, otype='색상', oname='팬텀 블랙', color_code='#000000', add_price=0))
+                # 2. 보호 케이스(악세사리) 추가 옵션
+                options.append(ProductOption(product_id=p.id, otype='추가구성', oname='선택 안함 (본품만)', add_price=0))
+                options.append(ProductOption(product_id=p.id, otype='추가구성', oname='충전 케이스 보호 커버(클리어)', add_price=9900))
+                # 3. 충전 어댑터 옵션 (요즘 환경보호 이슈로 빠지는 추세라 옵션으로 넣기 좋음)
+                options.append(ProductOption(product_id=p.id, otype='충전기', oname='C타입 케이블만 포함', add_price=0))
+                options.append(ProductOption(product_id=p.id, otype='충전기', oname='25W 고속 충전 어댑터 추가', add_price=25000))
+                # 4. 보험 서비스 (학원 프로젝트에서 로직 보여주기용)
+                options.append(ProductOption(product_id=p.id, otype='분실보장', oname='가입 안함', add_price=0))
+                options.append(ProductOption(product_id=p.id, otype='분실보장', oname='유닛 한쪽 분실 보장 플랜', add_price=15000))
+
+    # 3. 데이터베이스 저장
     db.session.add_all(options)
     db.session.commit()
 

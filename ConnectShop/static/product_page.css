@@ -202,3 +202,14 @@
     font-weight: 700;
     color: #333;
 }
+
+.btn-outline-danger {
+    font-size: 1.25rem !important; /* fs-5와 동일한 크기 */
+    line-height: 1.5;
+}
+
+/* 아이콘 크기도 함께 조정 */
+.btn-outline-danger i {
+    font-size: 1.3rem !important;
+    vertical-align: middle;
+}

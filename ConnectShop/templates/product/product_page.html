@@ -72,34 +72,40 @@
             </div>
 
             <div class="option-sections">
-                {# otype별로 그룹화하여 출력 #}
-                {% for group in product.options|groupby('otype') %}
-                <div class="option-group mb-5">
-                    <label class="fw-bold mb-3">{{ group.grouper }}</label>
-                    <div class="row g-2">
-                        {% for item in group.list %}
-                        <div class="col-12 mb-2"> {# 맥북 칩셋 같은 긴 텍스트는 col-12가 적당합니다 #}
-                            <button type="button"
-                                    class="btn btn-outline-dark w-100 p-3 text-start d-flex justify-content-between align-items-center option-btn"
-                                    data-add-price="{{ item.add_price }}"
-                                    data-option-id="{{ item.id }}"
-                                    data-image-variant="{{ item.image_variant }}">
-                                <div>
-                                    {% if item.color_code %}
-                                    <span class="color-circle d-inline-block me-2" style="background-color: {{ item.color_code }}; width:15px; height:15px; border-radius:50%; border:1px solid #ddd;"></span>
+            {# 1. 파이썬(View)에서 넘겨준 순서를 유지하기 위해 직접 로직 작성 #}
+            {% set displayed_types = [] %}
+            {% for opt in product.options %}
+                {% if opt.otype not in displayed_types %}
+                    {# 새로운 otype을 만날 때마다 그룹 생성 #}
+                    {% set _ = displayed_types.append(opt.otype) %}
+                    <div class="option-group mb-5">
+                        <label class="fw-bold mb-3">{{ opt.otype }}</label>
+                        <div class="row g-2">
+                            {# 해당 otype과 일치하는 아이템들만 출력 #}
+                            {% for item in product.options if item.otype == opt.otype %}
+                            <div class="col-12 mb-2">
+                                <button type="button"
+                                        class="btn btn-outline-dark w-100 p-3 text-start d-flex justify-content-between align-items-center option-btn {% if loop.first and opt.otype in displayed_types %}active btn-dark{% endif %}"
+                                        data-add-price="{{ item.add_price }}"
+                                        data-option-id="{{ item.id }}"
+                                        data-image-variant="{{ item.image_variant }}">
+                                    <div>
+                                        {% if item.color_code %}
+                                        <span class="color-circle d-inline-block me-2" style="background-color: {{ item.color_code }}; width:15px; height:15px; border-radius:50%; border:1px solid #ddd;"></span>
+                                        {% endif %}
+                                        <span>{{ item.oname }}</span>
+                                    </div>
+                                    {% if item.add_price > 0 %}
+                                    <span class="text-primary small">+{{ "{:,}".format(item.add_price) }}원</span>
                                     {% endif %}
-                                    <span>{{ item.oname }}</span>
-                                </div>
-                                {% if item.add_price > 0 %}
-                                <span class="text-primary small">+{{ "{:,}".format(item.add_price) }}원</span>
-                                {% endif %}
-                            </button>
+                                </button>
+                            </div>
+                            {% endfor %}
                         </div>
-                        {% endfor %}
                     </div>
-                </div>
-                {% endfor %}
-            </div>
+                {% endif %}
+            {% endfor %}
+        </div>
 
             <input type="hidden" id="raw-price" value="{{ product.price }}">
             <input type="hidden" id="max-stock" value="{{ product.stock }}">
@@ -192,13 +198,13 @@
                                     onclick="handleCouponClick()" style="border-style: dashed;">
                                 <i class="bi bi-ticket-perforated me-2"></i> 적용 가능한 쿠폰 확인하기
                             </button>
-                            <div id="selected-coupon-info" class="mt-2 text-center small text-danger fw-bold" style="display: none;">
+                            <div id="selected-coupon-info" class="mt-2 text-center small text-danger fw-bold fs-5" style="display: none;">
                                 <i class="bi bi-check-circle-fill"></i> <span id="applied-coupon-name"></span> (-<span id="applied-discount-amount">0</span>원)
                             </div>
                         </div>
 
                         <div class="mb-3">
-                            <button type="button" class="btn btn-outline-dark w-100 py-3 rounded-pill fw-bold"
+                            <button type="button" class="btn btn-outline-dark w-100 py-3 rounded-pill fw-bold fs-5"
                                     onclick="addToCartWithOptions({{ product.id }})">
                                 <i class="bi bi-bag me-2"></i> 장바구니 담기
                             </button>
@@ -680,5 +686,7 @@ function toggleWishlist(event, productId, btnElement) {
     })
     .catch(error => console.error('Error:', error));
 }
+
+
 </script>
 {% endblock %}
