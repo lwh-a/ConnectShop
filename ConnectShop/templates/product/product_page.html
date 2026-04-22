@@ -9,18 +9,26 @@
         <div class="nav-left-section">
             <div class="product-title-small">{{ product.name }}</div>
             <div class="nav-hyperlinks">
-                <a href="#section-reviews" class="me-2">사용 후기</a>
+                <a href="#section-reviews" class="me-2">상품 리뷰</a>
             </div>
         </div>
 
         <div class="nav-right-section d-flex align-items-center">
-            <div class="price-info me-3 text-end">
-                <div class="price-label">최종 혜택가</div>
-                <div class="price-value text-primary fw-bold">
-                    <span id="display-final-price">{{ "{:,}".format(product.price) }}</span>원
+            {# 🌟 재고가 있을 때만 가격과 구매 버튼 노출 #}
+            {% if product.stock > 0 %}
+                <div class="price-info me-3 text-end">
+                    <div class="price-label">최종 혜택가</div>
+                    <div class="price-value text-primary fw-bold">
+                        <span id="display-final-price">{{ "{:,}".format(product.price) }}</span>원
+                    </div>
                 </div>
-            </div>
-            <button class="btn btn-primary rounded-pill px-4" onclick="buyNow({{ product.id }})">구매하기</button>
+                <button class="btn btn-primary rounded-pill px-4" onclick="buyNow({{ product.id }})">구매하기</button>
+            {% else %}
+                {# 🌟 품절 시: 가격 대신 품절 안내 문구 표시 #}
+                <div class="sold-out-badge-nav px-3 py-2 bg-light text-danger fw-bold rounded-pill border border-danger">
+                    일시 품절된 상품입니다
+                </div>
+            {% endif %}
         </div>
     </div>
 </div>
@@ -100,11 +108,17 @@
             <input type="hidden" id="raw-price" value="{{ product.price }}">
             <input type="hidden" id="max-stock" value="{{ product.stock }}">
 
-            <div id="quantity-select" class="mb-5">
+            <div id="quantity-select"
+                 class="mb-5"
+                 {% if product.stock <= 0 %}style="display:none;"{% endif %}>
+
                 <div class="d-flex justify-content-between mb-2">
                     <span class="fw-bold">수량</span>
-                    <span class="text-muted small">남은 재고: <b id="stock-display">{{ product.stock }}</b>개</span>
+                    <span class="text-muted small">
+                        남은 재고: <b id="stock-display">{{ product.stock }}</b>개
+                    </span>
                 </div>
+
                 <div class="d-flex justify-content-between align-items-center p-3 border rounded-3">
                     <span>구매 수량</span>
                     <div class="btn-group">
@@ -113,10 +127,16 @@
                         <button type="button" class="btn btn-sm btn-light" id="plus-btn">+</button>
                     </div>
                 </div>
-                <p id="stock-warning" class="text-danger small mt-2" style="display: none; font-size: 0.75rem;">
-                    <i class="bi bi-exclamation-circle"></i> 해당 상품의 최대 재고까지만 선택 가능합니다.
-                </p>
             </div>
+
+            {% if product.stock <= 0 %}
+            <div class="mb-5 p-3 bg-white border border-danger rounded-3 text-center">
+                <span class="text-danger fw-bold">
+                    <i class="bi bi-exclamation-triangle"></i>
+                    현재 선택 가능한 재고가 없습니다.
+                </span>
+            </div>
+            {% endif %}
         </div>
     </div>
 </div>
@@ -183,6 +203,7 @@
                     </div>
 
                     <div class="action-buttons-group">
+                        {% if product.stock > 0 %}
                         <div class="mb-3">
                             <button type="button" class="btn btn-outline-danger w-100 py-3 rounded-3 fw-bold shadow-sm"
                                     onclick="handleCouponClick()" style="border-style: dashed;">
@@ -206,6 +227,22 @@
                                 바로 구매하기
                             </button>
                         </div>
+                        {% else %}
+                            {# --- 🌟 품절 시: 장바구니만 유지 + 품절 버튼 --- #}
+                            <div class="mb-3">
+                                <button type="button" class="btn btn-outline-dark w-100 py-3 rounded-pill fw-bold fs-5"
+                                        onclick="addToCartWithOptions({{ product.id }})">
+                                    <i class="bi bi-bag me-2"></i> 품절 상품 장바구니 담기
+                                </button>
+                            </div>
+
+                            <div class="mb-4">
+                                <button type="button" class="btn btn-secondary w-100 py-3 rounded-pill fw-bold fs-5" disabled>
+                                    SOLD OUT (입고 준비 중)
+                                </button>
+                            </div>
+
+                        {% endif %}
                     </div>
                     <div class="text-center">
                         <span class="text-muted delivery-date" style="font-size: 0.85rem;">
@@ -525,11 +562,23 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
+    // [배송 날짜 및 매진 안내 통합]
     const deliveryDateElement = document.querySelector('.delivery-date');
+    const stockInput = document.getElementById('max-stock');
+    const maxStock = stockInput ? parseInt(stockInput.value) : 0;
+
     if (deliveryDateElement) {
-        const tomorrow = new Date();
-        tomorrow.setDate(tomorrow.getDate() + 1);
-        deliveryDateElement.innerHTML = `<i class="bi bi-truck me-1"></i> 지금 주문 시 ${(tomorrow.getMonth() + 1).toString().padStart(2, '0')}월 ${tomorrow.getDate().toString().padStart(2, '0')}일 부터 순차 배송됩니다.`;
+        if (maxStock > 0) {
+            // 재고 있을 때
+            const tomorrow = new Date();
+            tomorrow.setDate(tomorrow.getDate() + 1);
+            const m = (tomorrow.getMonth() + 1).toString().padStart(2, '0');
+            const d = tomorrow.getDate().toString().padStart(2, '0');
+            deliveryDateElement.innerHTML = `<i class="bi bi-truck me-1"></i> 지금 주문 시 ${m}월 ${d}일 부터 순차 배송됩니다.`;
+        } else {
+            // 매진일 때
+            deliveryDateElement.innerHTML = `<i class="bi bi-info-circle me-1"></i> 이 상품은 현재 매진되었습니다. 장바구니에 담아두시면 재입고 시 확인이 편리합니다.`;
+        }
     }
 });
 

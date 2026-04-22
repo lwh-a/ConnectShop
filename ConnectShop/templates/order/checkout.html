@@ -322,7 +322,10 @@ document.addEventListener("DOMContentLoaded", async function() {
         const address_detail = document.getElementById('address_detail').value.trim();
         const couponId = document.getElementById('coupon-select').value;
 
-        // 🌟 팀원분 로직: 무통장 / 현금영수증 / 적립금 추출
+        // 🌟 [추가] 현재 페이지 주소에서 direct_buy=true 인지 확인합니다.
+        const urlParams = new URLSearchParams(window.location.search);
+        const isDirect = urlParams.get('direct_buy') === 'true';
+
         const mainMethod = document.querySelector('input[name="payment_main_method"]:checked').value;
         const rewardText = document.getElementById('display-reward').innerText;
         const calculatedReward = parseInt(rewardText.replace(/[^0-9]/g, "")) || 0;
@@ -330,7 +333,6 @@ document.addEventListener("DOMContentLoaded", async function() {
         const crType = document.querySelector('input[name="cr_type"]:checked')?.value || null;
         const crNumber = document.getElementById('cr_number')?.value.trim() || null;
 
-        // 🌟 팀장님 로직: 서버로 넘길 사용 포인트 값 추출
         const pointInput = document.getElementById('point-input');
         const usedPoint = pointInput ? (parseInt(pointInput.value) || 0) : 0;
 
@@ -346,12 +348,8 @@ document.addEventListener("DOMContentLoaded", async function() {
         }
 
         if (!recipient || !phone || !address) { alert("배송 정보를 모두 입력해주세요."); return; }
-        if (!recipient) { alert("수령인 이름을 입력해주세요."); return; }
-        if (!phone) { alert("연락처를 입력해주세요."); return; }
-        if (!address) { alert("배송 주소를 입력해주세요."); return; }
 
         try {
-            // 🌟 두 사람의 데이터를 하나로 합쳐서 전송!
             const response = await fetch('/order/save_temp_info', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -371,18 +369,30 @@ document.addEventListener("DOMContentLoaded", async function() {
 
             if (!response.ok) throw new Error("세션 저장 실패");
 
-            // 🌟 팀원분의 결제 수단 분기 처리 적용!
+            // 🌟 결제 성공 후 돌아올 기본 주소 설정
+            let successUrl = window.location.origin + "/order/success";
+
+            // 🌟 [핵심] 바로 구매 상태라면 성공 주소 뒤에 암구호를 붙여줍니다!
+            if (isDirect) {
+                successUrl += "?direct_buy=true";
+            }
+
             if (mainMethod === 'TOSS') {
                 await widgets.requestPayment({
                     orderId: "order_temp_{{ now_ts }}",
                     orderName: "ConnectShop 상품 결제",
-                    successUrl: window.location.origin + "/order/success",
+                    successUrl: successUrl, // 🚀 업데이트된 주소 사용!
                     failUrl: window.location.origin + "/order/fail",
                     customerName: recipient,
                 });
             } else {
                 const amount = document.getElementById('payment-button').innerText.replace(/[^0-9]/g, "");
-                window.location.href = `/order/success?paymentType=VBANK&orderId=vbank_{{ now_ts }}&amount=${amount}`;
+                // 🌟 무통장 입금 주소에도 direct_buy 신호를 추가합니다.
+                let vbankUrl = `/order/success?paymentType=VBANK&orderId=vbank_{{ now_ts }}&amount=${amount}`;
+                if (isDirect) {
+                    vbankUrl += "&direct_buy=true";
+                }
+                window.location.href = vbankUrl;
             }
         } catch (error) {
             console.error("결제 중 오류 발생:", error);
