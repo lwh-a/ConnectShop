@@ -5,29 +5,30 @@
 <div class="container my-5" style="max-width: 900px;">
     <div class="d-flex justify-content-between align-items-end mb-4 border-bottom pb-3">
         <div class="d-flex align-items-end gap-3">
-            <h3 class="fw-bold mb-0">주문 취소 내역</h3>
-            <span class="text-muted small">결제 취소 및 주문 철회 현황입니다.</span>
+            <h3 class="fw-bold mb-0">교환/환불 내역</h3>
+            <span class="text-muted small">교환 신청 및 환불 처리 현황입니다.</span>
         </div>
         <div class="back-nav-wrapper">
-            {# 로그인 안되어 있으면 '홈으로' 버튼 표시 #}
-            <a href="{{ url_for('auth.mypage') if g.user else url_for('main.index') }}" class="btn-back-box text-decoration-none text-dark">
+            <a href="{{ url_for('auth.mypage') }}" class="btn-back-box text-decoration-none text-dark">
                 <i class="bi bi-chevron-left"></i>
-                <span>{{ '마이페이지' if g.user else '홈으로' }}</span>
+                <span>마이페이지</span>
             </a>
         </div>
     </div>
 
-    {% if cancel_items %}
-        {% for item in cancel_items %}
+    {% if return_items %}
+        {% for item in return_items %}
         <div class="card border-0 shadow-sm mb-3 overflow-hidden">
             <div class="card-body p-0">
                 <div class="d-flex align-items-center p-3">
+                    {# 1. 상품 이미지 영역 #}
                     <div class="flex-shrink-0 border rounded p-1 bg-light" style="width: 100px; height: 100px;">
                         <img src="{{ url_for('static', filename='images/menu/' + item.product.image_path) }}"
                              class="img-fluid h-100 w-100 object-fit-contain"
                              onerror="this.src='/static/images/no-image.png'">
                     </div>
 
+                    {# 2. 상품 상세 정보 영역 #}
                     <div class="ms-4 flex-grow-1">
                         <div class="d-flex justify-content-between align-items-start">
                             <div>
@@ -48,11 +49,19 @@
                                 </div>
                             </div>
 
+                            {# 3. 상태 배지 및 합계 금액 (오른쪽 정렬) #}
                             <div class="text-end">
-                                {% set display_status = item.status if item.status else item.parent_order.status %}
+                                {% set display_status = item.status %}
                                 <span class="badge rounded-pill px-3 py-2
-                                    {# 취소 완료는 강조(danger), 그 외 대기 중인 취소는 무채색(secondary) #}
-                                    {{ 'bg-danger' if '취소완료' in display_status else 'bg-secondary' }}"
+                                    {% if '완료' in display_status %}
+                                        bg-success
+                                    {% elif '거절' in display_status or '반려' in display_status %}
+                                        bg-danger
+                                    {% elif '교환' in display_status %}
+                                        bg-info text-white  {# 🌟 교환은 하늘색(info)으로 차별화 #}
+                                    {% else %}
+                                        bg-warning text-dark
+                                    {% endif %}"
                                     style="font-size: 0.85rem;">
                                     {{ display_status }}
                                 </span>
@@ -64,6 +73,8 @@
                     </div>
                 </div>
             </div>
+
+            {# 4. 푸터 버튼 (상세보기 링크) #}
             <div class="card-footer bg-white border-top py-2 px-3 text-end">
                 <a href="{{ url_for('order.order_detail', order_id=item.parent_order.id) }}" class="btn btn-sm btn-outline-secondary rounded-pill px-3">
                     주문 상세 보기
@@ -73,8 +84,8 @@
         {% endfor %}
     {% else %}
         <div class="text-center py-5 bg-light rounded-4 border">
-            <i class="bi bi-file-earmark-x text-muted display-4"></i>
-            <p class="mt-3 text-muted">최근 취소된 주문 내역이 없습니다.</p>
+            <i class="bi bi-arrow-counterclockwise text-muted display-4"></i>
+            <p class="mt-3 text-muted">최근 반품 또는 환불된 내역이 없습니다.</p>
             <a href="{{ url_for('main.index') }}" class="btn btn-primary rounded-pill px-4">계속 쇼핑하기</a>
         </div>
     {% endif %}
