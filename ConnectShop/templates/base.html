@@ -203,6 +203,23 @@
         color: #007bff !important; /* 마우스 올리면 파란색으로 */
         transform: translateX(3px); /* 마우스 올리면 화살표 방향으로 살짝 이동 */
     }
+
+    @media all and (min-width: 992px) {
+        .navbar .nav-item .dropdown-menu {
+            display: block;
+            visibility: hidden;
+            opacity: 0;
+            transform: translateY(-10px);
+            transition: all 0.3s ease-in-out;
+            margin-top: 0;
+        }
+
+        .navbar .nav-item:hover .dropdown-menu {
+            visibility: visible;
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
 </style>
 </head>
 
@@ -491,7 +508,7 @@
                 </div>
             </div>
             <p class="mb-0">© 2026 ConnectShop. All rights reserved.</p>
-            <p class="small">사업자등록번호: 123-45-67890 | 대표자: OOO | 고객센터: 1588-0000</p>
+            <p class="small">사업자등록번호: 123-45-67890 | 대표자: 커넥트샵 | 고객센터: 1588-0000</p>
         </div>
     </footer>
 

@@ -800,6 +800,22 @@ def success():
         flash("결제 승인 과정에서 문제가 발생했습니다.")
         return redirect(url_for('order.checkout'))
 
+# =======================================================
+# 🌟 [추가] 결제 실패 시 처리하는 라우트
+# =======================================================
+@bp.route('/fail')
+def fail():
+    # 토스가 URL에 달아서 보내준 에러 사유(message)를 읽어옵니다.
+    error_code = request.args.get('code')
+    error_message = request.args.get('message', '결제 중 알 수 없는 오류가 발생했습니다.')
+
+    print(f"--- [결제 실패] 코드: {error_code}, 메시지: {error_message}")
+
+    # 고객의 화면에 토스가 보내준 실패 사유를 예쁘게 띄워줍니다.
+    flash(f"결제에 실패했습니다. 사유: {error_message}")
+
+    # 다시 결제를 시도할 수 있도록 장바구니 페이지로 돌려보냅니다.
+    return redirect(url_for('order._list'))
 
 
 

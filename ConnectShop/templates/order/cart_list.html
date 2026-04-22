@@ -96,6 +96,21 @@
                     <div class="text-muted small">
                         개당 <span id="unit-price-{{ target_id }}">{{ "{:,}".format(item.price) }}</span>원
                     </div>
+                    <div class="d-flex align-items-center justify-content-end mt-2 text-nowrap">
+                        <a href="javascript:void(0);"
+                           class="text-secondary small text-decoration-none"
+                           onclick="changeOptionAndRedirect('{{ item.id }}', '{{ url_for('product.page', product_id=item.product.id) }}');">
+                           옵션 변경
+                        </a>
+
+                        <span class="text-muted mx-2" style="font-size: 0.8rem;">|</span>
+
+                        <a href="{{ url_for('order.delete', cart_id=item.id) }}"
+                           class="item-delete-link text-danger small text-decoration-none"
+                           onclick="return confirm('삭제하시겠습니까?')">
+                           삭제
+                        </a>
+                    </div>
                 </div>
             </div>
             {% endfor %}
@@ -186,6 +201,29 @@
             });
         }
     });
+    // 🌟 장바구니 아이템 삭제 후 상품 페이지로 이동하는 마법의 함수
+    async function changeOptionAndRedirect(cartId, productUrl) {
+        // 1. 팀장님이 원하신 찰떡같은 안내 문구!
+        if (confirm('옵션을 변경하시려면 상품 상세 페이지에서 새로 담아주세요. 이동하시겠습니까?')) {
+            try {
+                // 2. 장바구니에서 해당 아이템을 몰래 지웁니다.
+                const response = await fetch(`/order/delete/${cartId}`, {
+                    method: 'GET',
+                    headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                });
+
+                // 3. 지우는 데 성공했다면 상품 상세 페이지로 강제 이동! 🚀
+                if (response.ok) {
+                    window.location.href = productUrl;
+                } else {
+                    alert("상품을 지우는 데 실패했습니다.");
+                }
+            } catch (error) {
+                console.error("Error:", error);
+                alert("서버 통신 중 오류가 발생했습니다.");
+            }
+        }
+    }
 
 </script>
 {% endblock %}
