@@ -1199,9 +1199,8 @@ def approve_refund(item_id):
     db.session.commit()
     return jsonify({"success": True, "message": "환불 처리가 최종 승인되었습니다."})
 
-
 # =======================================================
-# 🌟 팀장님 로직: 마이페이지 구매확정/환불 대상 리스트 조회
+# 🌟 팀장님 로직: 마이페이지 구매확정/환불 대상 리스트 조회 API
 # =======================================================
 @bp.route('/api/get_delivery_done_items')
 @login_required
@@ -1239,6 +1238,40 @@ def get_delivery_done_items():
     })
 
 
+# =======================================================
+# 🌟 사용자(팀장님) 추가 로직: AJAX 구매 확정 및 확정 리스트
+# =======================================================
+@bp.route('/api/confirm', methods=['POST'])
+@login_required
+def confirm_order():
+    data = request.get_json()
+    order_id = data.get('order_id')
+
+    # 주문 찾기 (본인의 주문인지 확인)
+    order = Order.query.filter_by(id=order_id, user_id=g.user.id).first()
+
+    if order:
+        order.status = '구매확정'  # 상태 변경
+        db.session.commit()
+        return jsonify({'success': True})
+    else:
+        return jsonify({'success': False, 'message': '주문을 찾을 수 없습니다.'}), 404
+
+@bp.route('/confirmed_list')
+@login_required
+def confirmed_list():
+    # 상태가 '구매확정'인 주문들만 필터링
+    confirmed_orders = Order.query.filter_by(
+        user_id=g.user.id,
+        status='구매확정'
+    ).order_by(Order.order_date.desc()).all()
+
+    return render_template('order/confirmed_list.html', orders=confirmed_orders)
+
+
+# =======================================================
+# 🌟 메인(팀원) 추가 로직: 부분 환불 및 포인트/재고 정밀 계산
+# =======================================================
 @bp.route('/order/refund_item/<int:order_id>/<int:item_id>', methods=['POST'])
 @login_required
 def refund_item(order_id, item_id):
@@ -1312,4 +1345,3 @@ def refund_item(order_id, item_id):
     db.session.commit()
     flash(f"'{order_item.product.name}' 상품의 환불 처리가 완료되었습니다. (배송비 제외)")
     return redirect(url_for('order.order_detail', order_id=order_id))
-
