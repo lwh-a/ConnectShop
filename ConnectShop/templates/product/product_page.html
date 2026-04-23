@@ -110,7 +110,7 @@
 
             <div id="quantity-select"
                  class="mb-5"
-                 {% if product.stock <= 0 %}style="display:none;"{% endif %}>
+                 {% if 0 >= product.stock %}style="display:none;"{% endif %}>
 
                 <div class="d-flex justify-content-between mb-2">
                     <span class="fw-bold">수량</span>
@@ -296,6 +296,7 @@
                         <div class="card-body p-4">
                             <h6 class="fw-bold mb-3">리뷰 작성하기</h6>
                             <form action="{{ url_for('review.create', product_id=product.id) }}" method="POST" enctype="multipart/form-data">
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                                 <div class="mb-3">
                                     <label class="form-label text-muted small">별점</label>
                                     <select name="rating" class="form-select w-auto border-0 shadow-sm" required>
@@ -344,6 +345,7 @@
                             <div class="d-flex justify-content-end gap-2 mt-2">
                                 <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#editReviewModal{{ review.id }}">수정</button>
                                 <form action="{{ url_for('review.delete', review_id=review.id) }}" method="POST">
+                                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                                     <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('정말 이 리뷰를 삭제하시겠습니까?');">삭제</button>
                                 </form>
                             </div>
@@ -356,6 +358,7 @@
                                             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                                         </div>
                                         <form action="{{ url_for('review.edit', review_id=review.id) }}" method="POST" enctype="multipart/form-data">
+                                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                                             <div class="modal-body">
                                                 <div class="mb-3">
                                                     <label class="form-label small text-muted">별점 수정</label>
@@ -442,6 +445,7 @@
 <input type="hidden" id="is-membership" value="{{ 'true' if g.user and g.user.is_membership else 'false' }}">
 
 <script>
+const csrfToken = "{{ csrf_token() }}";
 // [1] 전역 상태 관리
 let appliedCoupon = null;
 const DEFAULT_SHIPPING_FEE = 3000;
@@ -637,7 +641,8 @@ function addToCartWithOptions(productId) {
         method: 'POST',
         headers: {
             'X-Requested-With': 'XMLHttpRequest',
-            'Content-Type': 'application/json'
+            'Content-Type': 'application/json',
+            'X-CSRFToken': csrfToken
         },
         body: JSON.stringify({
             quantity: quantity,
@@ -701,7 +706,8 @@ function buyNow(productId) {
         method: 'POST',
         headers: {
             'X-Requested-With': 'XMLHttpRequest',
-            'Content-Type': 'application/json'
+            'Content-Type': 'application/json',
+            'X-CSRFToken': csrfToken
         },
         body: JSON.stringify({
             quantity: quantity,
@@ -758,7 +764,8 @@ function toggleWishlist(event, productId, btnElement) {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
-            'X-Requested-With': 'XMLHttpRequest'
+            'X-Requested-With': 'XMLHttpRequest',
+            'X-CSRFToken': csrfToken
         }
     })
     .then(response => {

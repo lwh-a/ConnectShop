@@ -98,6 +98,7 @@
                         <div class="action-buttons">
                             {% if order.status == '결제완료' %}
                                 <form action="{{ url_for('order.cancel_order', order_id=order.id) }}" method="post" class="d-inline">
+                                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                                     <button type="submit" class="btn-figma-secondary" onclick="return confirm('정말 취소하시겠습니까?');">주문취소</button>
                                 </form>
 
@@ -111,6 +112,7 @@
 
                             {% elif order.status == '배송완료' %}
                                 <form action="{{ url_for('order.confirm_purchase', order_id=order.id) }}" method="post" class="d-inline">
+                                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                                     <button type="submit" class="btn-figma-primary">구매확정</button>
                                 </form>
 

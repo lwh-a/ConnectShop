@@ -24,6 +24,7 @@
 
     {% if cart_list %}
         <form action="{{ url_for('order.delete_selected') }}" method="POST" id="cart-form">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
             {# 상단 제어 바 #}
             <div class="cart-controls d-flex justify-content-between align-items-center mb-3">
                 <div class="d-flex align-items-center">
@@ -101,9 +102,9 @@
 
                         <span class="text-muted mx-2" style="font-size: 0.8rem;">|</span>
 
-                        <a href="{{ url_for('order.delete', cart_id=item.id) }}"
+                        <a href="javascript:void(0);"
                            class="item-delete-link text-danger small text-decoration-none"
-                           onclick="return confirm('삭제하시겠습니까?')">
+                           onclick="deleteCartItem('{{ item.id }}')">
                            삭제
                         </a>
                     </div>
@@ -162,8 +163,11 @@
 
 {% block script %}
 <script>
+    // 🛡️ 상단 폼에 심어둔 CSRF 토큰을 가져오는 함수
+    const getCsrfToken = () => document.querySelector('input[name="csrf_token"]').value;
+
     document.addEventListener('DOMContentLoaded', function() {
-        // 결제 버튼 재고 체크
+        // 1. 결제 버튼 재고 체크
         const checkoutBtn = document.querySelector('.btn-checkout');
         if (checkoutBtn) {
             checkoutBtn.addEventListener('click', function(e) {
@@ -175,7 +179,7 @@
             });
         }
 
-        // 전체 선택 기능
+        // 2. 전체 선택 기능
         const checkAll = document.getElementById('check-all');
         const itemChecks = document.querySelectorAll('.item-check');
         if (checkAll) {
@@ -184,7 +188,7 @@
             });
         }
 
-        // 개별 체크박스 -> 전체 선택 동기화
+        // 3. 개별 체크박스 -> 전체 선택 동기화
         itemChecks.forEach(check => {
             check.addEventListener('change', function() {
                 const checkedCount = document.querySelectorAll('.item-check:checked').length;
@@ -192,17 +196,17 @@
             });
         });
 
-        // 폼 제출 시 컨펌 (선택 삭제일 경우만)
+        // 4. 폼 제출 시 컨펌 (선택 삭제 및 품절 상품 삭제)
         const cartForm = document.getElementById('cart-form');
         if (cartForm) {
             cartForm.addEventListener('submit', function(e) {
-                const checkedCount = document.querySelectorAll('.item-check:checked').length;
-
-                // 클릭된 버튼이 '선택 삭제'인지 '주문'인지 확인
+              // 클릭된 버튼이 무엇인지 감지
                 const isDelete = e.submitter && e.submitter.classList.contains('btn-delete-selected');
-                const isOrder = e.submitter && (e.submitter.classList.contains('btn-checkout-selected') || e.submitter.formAction.includes('checkout'));
+                const isDeleteSoldout = e.submitter && e.submitter.classList.contains('btn-delete-soldout');
+                const isOrder = e.submitter && (e.submitter.classList.contains('btn-checkout-selected') || (e.submitter.formAction && e.submitter.formAction.includes('checkout')));
 
                 if (isDelete || isOrder) {
+                    const checkedCount = document.querySelectorAll('.item-check:checked').length;
                     if (checkedCount === 0) {
                         e.preventDefault();
                         alert("주문(또는 삭제)할 상품을 선택해 주세요.");
@@ -212,34 +216,85 @@
                     if (isDelete && !confirm(checkedCount + "개의 상품을 삭제하시겠습니까?")) {
                         e.preventDefault();
                     }
+                } else if (isDeleteSoldout) {
+                    if (!confirm("품절된 모든 상품을 삭제하시겠습니까?")) {
+                        e.preventDefault();
+                    }
                 }
             });
         }
     });
-    // 🌟 장바구니 아이템 삭제 후 상품 페이지로 이동하는 마법의 함수
-    async function changeOptionAndRedirect(cartId, productUrl) {
-        // 1. 팀장님이 원하신 찰떡같은 안내 문구!
-        if (confirm('옵션을 변경하시려면 상품 상세 페이지에서 새로 담아주세요. 이동하시겠습니까?')) {
-            try {
-                // 2. 장바구니에서 해당 아이템을 몰래 지웁니다.
-                const response = await fetch(`/order/delete/${cartId}`, {
-                    method: 'GET',
-                    headers: { 'X-Requested-With': 'XMLHttpRequest' }
-                });
 
-                // 3. 지우는 데 성공했다면 상품 상세 페이지로 강제 이동! 🚀
-                if (response.ok) {
-                    window.location.href = productUrl;
-                } else {
-                    alert("상품을 지우는 데 실패했습니다.");
+    // 🌟 [핵심] 실제 서버에 POST + 토큰을 쏘는 공통 삭제 로직
+    async function executeDelete(cartId) {
+        try {
+            const response = await fetch(`/order/delete/${cartId}`, {
+                method: 'POST', // 🛡️ GET에서 POST로 보안 강화!
+                headers: {
+                    'X-CSRFToken': getCsrfToken(), // 🛡️ 보안 입장권 장착
+                    'X-Requested-With': 'XMLHttpRequest'
                 }
-            } catch (error) {
-                console.error("Error:", error);
-                alert("서버 통신 중 오류가 발생했습니다.");
+            });
+
+            if (response.ok) return true;
+
+            alert("처리 중 오류가 발생했습니다.");
+            return false;
+        } catch (error) {
+            console.error("Error:", error);
+            alert("서버 통신 오류가 발생했습니다.");
+            return false;
+        }
+    }
+
+    // 🗑️ 5. 단순 삭제 버튼 클릭 시 호출
+    async function deleteCartItem(cartId) {
+        if (!confirm('정말 삭제하시겠습니까?')) return;
+
+        const success = await executeDelete(cartId);
+        if (success) {
+            location.reload(); // 성공 시 화면 갱신
+        }
+    }
+
+    // 🔄 6. 옵션 변경 후 상품 페이지 이동 함수 (POST 버전)
+    async function changeOptionAndRedirect(cartId, productUrl) {
+        if (confirm('옵션을 변경하시려면 상품 상세 페이지에서 새로 담아주세요. 이동하시겠습니까?')) {
+            const success = await executeDelete(cartId);
+            if (success) {
+                window.location.href = productUrl; // 성공 시 상품 상세로 🚀
             }
         }
     }
 
+    // 7. 수량 변경 함수 (기존 로직 유지)
+    function updateQuantity(id, action, btn) {
+        fetch(`/order/modify/${id}/${action}`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': getCsrfToken(),
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) {
+                if (data.is_deleted) {
+                    location.reload();
+                } else {
+                    document.getElementById(`qty-${id}`).innerText = data.new_quantity;
+                    document.getElementById(`item-total-${id}`).innerText = data.item_total.toLocaleString() + '원';
+                    document.getElementById('summary-subtotal').innerText = data.pure_total.toLocaleString() + '원';
+                    document.getElementById('summary-total').innerText = data.total_price.toLocaleString() + '원';
+
+                    // 장바구니 헤더 아이콘 숫자 업데이트가 필요한 경우 추가
+                    const cartCountBadge = document.querySelector('.cart-count-badge');
+                    if (cartCountBadge) cartCountBadge.innerText = data.cart_count;
+                }
+            }
+        })
+        .catch(err => console.error(err));
+    }
 </script>
 {% endblock %}
 {% endblock %}

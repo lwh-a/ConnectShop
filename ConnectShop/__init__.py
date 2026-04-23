@@ -2,12 +2,15 @@ from flask import Flask, g, session
 from flask_migrate import Migrate
 from flask_sqlalchemy import SQLAlchemy
 from flask_mail import Mail  # 🌟 1. Mail 모듈 가져오기
+from flask_wtf.csrf import CSRFProtect # 🛡️ CSRF 보안 모듈 추가!
+
 import config
 
-# 전역 변수로 db, migrate, mail 객체를 생성합니다.
+# 전역 변수로 db, migrate, mail, csrf 객체를 생성합니다.
 db = SQLAlchemy()
 migrate = Migrate()
-mail = Mail()  # 🌟 2. 전역 변수로 mail 객체 생성 (이 줄이 없어서 에러가 났습니다!)
+mail = Mail()  # 🌟 2. 전역 변수로 mail 객체 생성
+csrf = CSRFProtect() # 🛡️ CSRF 전역 객체 생성!
 
 def create_app():
     # 플라스크 앱 인스턴스 생성
@@ -24,10 +27,11 @@ def create_app():
     app.config['MAIL_PASSWORD'] = 'xyeqqaadisjdteol'   # 🚨 띄어쓰기 없이 16자리 문자 입력
     app.config['MAIL_DEFAULT_SENDER'] = 'gangto3333@gmail.com' # 🚨 본인의 구글 이메일 주소
 
-    # ORM (데이터베이스) 및 Mail 연동
+    # ORM (데이터베이스) 및 Mail, CSRF 연동
     db.init_app(app)
     migrate.init_app(app, db)
     mail.init_app(app) # 🌟 4. 플라스크 앱에 mail 객체 등록
+    csrf.init_app(app) # 🛡️ 플라스크 앱에 CSRF 보안 객체 등록!
 
     # 요약 장바구니 데이터 주입 로직
     @app.context_processor

@@ -364,7 +364,7 @@ def modify(cart_id, action):
 
     return redirect(request.referrer or url_for('order._list'))
 
-@bp.route('/delete/<int:cart_id>')
+@bp.route('/delete/<int:cart_id>', methods=['POST'])
 def delete(cart_id):
     if g.user:
         cart_item = db.session.get(Cart, cart_id)

@@ -54,6 +54,7 @@
                     </div>
 
                     <form id="withdrawForm" action="{{ url_for('auth.withdraw') }}" method="POST" style="display:none;">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                     </form>
                     {% endif %}
                 </div>
@@ -269,6 +270,7 @@
 
 
 <script>
+    const csrfToken = "{{ csrf_token() }}";
 
     const subMenuData = {
         'account': [
@@ -571,6 +573,9 @@
 
         fetch(`/auth/api/review/edit/${id}`, {
             method: 'POST',
+            headers: {
+            'X-CSRFToken': csrfToken
+        },
             body: formData
         })
             .then(safeJson)
@@ -586,7 +591,12 @@
     }
 
     function deleteReview(id) {
-        fetch(`/auth/api/review/delete/${id}`, { method: 'POST' })
+        fetch(`/auth/api/review/delete/${id}`, {
+        method: 'POST',
+        headers: {
+        'X-CSRFToken': csrfToken
+        }
+         })
             .then(safeJson)
             .then(data => {
                 if (data.success) {

@@ -414,7 +414,9 @@ document.addEventListener("DOMContentLoaded", async function() {
             // 6. 서버에 배송/쿠폰 정보 임시 저장 (AJAX)
             const saveResponse = await fetch('/order/save_temp_info', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: { 'Content-Type': 'application/json',
+                'X-CSRFToken': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                },
                 body: JSON.stringify({
                     recipient: userRecipient,
                     phone: userPhone,

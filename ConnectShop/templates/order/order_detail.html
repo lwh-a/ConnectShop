@@ -197,6 +197,7 @@
             <div class="card-section">
                 <h3 class="section-label highlight-red">주문 취소</h3>
                 <form action="{{ url_for('order.cancel_order', order_id=order.id) }}" method="POST">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                     {% if not g.user %}
                         <p class="small-info">비회원 주문 취소를 위해 연락처를 입력해주세요.</p>
                         <input type="text"
@@ -236,7 +237,7 @@
 <div class="modal fade" id="refundModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content custom-modal">
-            <form id="refundForm" method="GET"> <div class="modal-header">
+            <form id="refundForm" method="POST"> <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"> <div class="modal-header">
                     <h5 class="modal-title">교환 및 환불 신청</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
@@ -284,6 +285,7 @@
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content custom-modal">
             <form action="{{ url_for('order.update_address', order_id=order.id) }}" method="POST">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                 <div class="modal-header">
                     <h5 class="modal-title">배송지 정보 수정</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>

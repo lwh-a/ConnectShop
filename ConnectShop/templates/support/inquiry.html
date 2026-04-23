@@ -34,6 +34,7 @@
     </div>
 
     <form action="{{ url_for('main.inquiry') }}" method="POST" enctype="multipart/form-data" novalidate>
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
 
         <div class="mb-4">
             <label class="fw-bold mb-2">문의 분야 선택 <span class="text-danger">*</span></label>
