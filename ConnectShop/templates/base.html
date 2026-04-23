@@ -11,35 +11,35 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 
     <style>
-/* 애플 스타일: 네비게이션 바 글자 크기와 간격 미세 조정 */
+/* 네비게이션 바 */
     .apple-nav .nav-link {
         font-size: 0.85rem;
         color: #333 !important;
         padding: 0.5rem 1rem !important;
-        position: relative; /* 🌟 추가: 파란색 밑줄이 달릴 기준점 설정 */
+        position: relative;
     }
 
-/* 🌟 복구: 모든 메뉴(nav-item)에 마우스를 올리면 글자가 까맣고 굵어지게 변경 */
+/* 호버 시 글자가 까맣고 굵어지게 변경 */
     .apple-nav .nav-item:hover > .nav-link,
     .apple-nav .nav-link.active {
     color: #000 !important;
     text-shadow: 0 0 0.5px #000, 0 0 0.5px #000;
     }
 
-    /* 🌟 복구: 모든 메뉴(nav-item)에 삼성 스타일의 파란색 밑줄 애니메이션 적용 */
+    /* 파란색 밑줄 애니메이션 적용 */
     .apple-nav .nav-item:hover > .nav-link::after,
     .apple-nav .nav-link.active::after{
         content: '';
         position: absolute;
         bottom: 0px;
-        left: 1rem;  /* 글자 길이에 딱 맞게 밑줄을 긋기 위해 여백 조절 */
+        left: 1rem;
         right: 1rem;
-        height: 3px; /* 밑줄 두께 */
-        background-color: #007bff; /* 삼성 스타일의 쨍한 파란색 */
+        height: 3px;
+        background-color: #007bff;
         border-radius: 2px;
     }
 
-    /* 드롭다운 메뉴 디자인 (삼성 스타일 둥근 모서리 및 그림자) */
+    /* 드롭다운 메뉴 디자인 */
     .dropdown-menu {
         border: none;
         border-radius: 12px;
@@ -48,18 +48,17 @@
     }
 
     /* --- 메가 검색 패널 스타일 --- */
-    header { position: relative; } /* 검색창이 헤더 바로 아래 붙도록 기준점 설정 */
+    header { position: relative; }
 
     .search-panel {
         position: absolute;
         top: 100%;
         left: 0;
         width: 100%;
-        background-color: #f8f9fa; /* ✅ 수정됨: 헤더(bg-light)와 완벽히 동일한 회색 톤 */
+        background-color: #f8f9fa;
         padding: 40px 0 60px 0;
         z-index: 1050;
         border-top: 1px solid #ddd;
-        /* 애니메이션 효과 */
         opacity: 0;
         visibility: hidden;
         transform: translateY(-10px);
@@ -72,7 +71,6 @@
         transform: translateY(0);
     }
 
-    /* 입력창 디자인 */
     .search-input-wrapper {
         display: flex;
         align-items: center;
