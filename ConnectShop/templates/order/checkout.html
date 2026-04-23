@@ -434,6 +434,19 @@ document.addEventListener("DOMContentLoaded", async function() {
             if (!saveResponse.ok) throw new Error("배송 정보 저장에 실패했습니다.");
 
             // 7. 결제 수단별 실제 요청 실행
+            const currentAmount = parseInt(document.getElementById('payment-button').innerText.replace(/[^0-9]/g, ""));
+
+            if (currentAmount === 0) {
+                // [0원 결제 처리] 토스 위젯을 거치지 않고 바로 성공 페이지로 리다이렉트
+                // 0원 결제임을 알리기 위해 전용 타입(POINT_ONLY)을 파라미터로 붙여줍니다.
+                if (confirm("전액 포인트로 결제하시겠습니까?")) {
+                    window.location.href = `${successUrl}&paymentType=POINT_ONLY&amount=0&orderId=point_{{ now_ts }}`;
+                    return; // 함수 종료
+                } else {
+                    return;
+                }
+            }
+
             if (mainMethod === 'TOSS') {
                 // 토스 위젯 결제 호출
                 await widgets.requestPayment({

@@ -612,6 +612,12 @@ def success():
     if payment_type == 'VBANK':
         is_success = True
         payment_method_used = '무통장입금'
+
+    elif payment_type == 'POINT_ONLY':
+        is_success = True
+        payment_method_used = '전액포인트결제'
+        print(f"--- [0원 결제] 전액 포인트 주문을 승인 없이 처리합니다. OrderID: {order_id}")
+
     else:
         secret_key = "test_gsk_docs_OaPz8L5KdmQXkzRz3y47BMw6" + ":"
         encoded_key = base64.b64encode(secret_key.encode()).decode()
@@ -933,6 +939,10 @@ def cancel_order(order_id):
         if hasattr(order, 'reward_point') and order.reward_point > 0:
             print(f"--- [적립 취소] {order.reward_point}P 지급 예정이 취소되었습니다.")
             order.reward_point = 0
+
+        if g.user and hasattr(order, 'used_point') and order.used_point > 0:
+            g.user.point += order.used_point
+            print(f"--- [포인트 반환] {order.used_point}P가 사용자 계정으로 복구되었습니다.")
 
         order.status = '주문취소'
         db.session.commit()
