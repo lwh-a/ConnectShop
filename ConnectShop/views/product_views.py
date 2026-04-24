@@ -50,41 +50,49 @@ def product_list():
 # 2. 상세 페이지 함수
 @bp.route('/page/<int:product_id>/')
 def page(product_id):
+    # [1] 데이터베이스에서 해당 상품 정보 가져오기
     product = Product.query.get_or_404(product_id)
-    # 🌟 [팀장님 로직] 최근 본 카테고리 저장 (날개 배너용)
+
+    # 🌟 [2] 평균 별점 계산 (여기가 가장 좋은 위치!)
+    if product.reviews:
+        # 합계를 개수로 나눠 평균 산출
+        avg_val = sum(r.rating for r in product.reviews) / len(product.reviews)
+        average_rating = round(avg_val, 1)
+    else:
+        # 리뷰가 아예 없을 때를 대비한 기본값
+        average_rating = 0.0
+
+    # [3] 팀장님 로직: 세션에 카테고리 저장
     session['recent_viewed_category'] = product.category
 
-    # 🌟 [팀원 로직] 옵션 정렬 및 otype별 그룹화
-    # 1. 먼저 모든 옵션을 ID 순으로 정렬
+    # [4] 팀원 로직: 옵션 그룹화 (OrderedDict 활용)
     sorted_options = sorted(product.options, key=lambda x: x.id)
-
-    # 2. 순서가 보장되는 딕셔너리에 otype별로 그룹화
-    # 이렇게 하면 먼저 등장하는 otype(예: 모델)이 무조건 첫 번째 그룹이 됩니다.
     grouped_options = OrderedDict()
     for opt in sorted_options:
         if opt.otype not in grouped_options:
             grouped_options[opt.otype] = []
         grouped_options[opt.otype].append(opt)
+
+    # [5] 추천 상품 로직: 랜덤으로 8개 추출
     recommended_products = Product.query.filter(Product.id != product_id).order_by(func.random()).limit(8).all()
 
+    # [6] 사용자별 맞춤 데이터 (쿠폰, 리뷰 작성 여부)
     coupons = []
     has_reviewed = False
-
     if g.user:
-        # 로그인한 사용자의 '사용 안 함(False)' 쿠폰만 가져오기
         coupons = Coupon.query.filter_by(user_id=g.user.id, is_used=False).all()
-
-        # 현재 로그인한 유저가 이 상품에 리뷰를 남겼는지 확인
         existing_review = Review.query.filter_by(user_id=g.user.id, product_id=product_id).first()
         if existing_review:
             has_reviewed = True
 
+    # [7] 마지막: 모든 재료를 템플릿(HTML)으로 전송
     return render_template('product/product_page.html',
                            product=product,
                            grouped_options=grouped_options,
                            coupons=coupons,
                            has_reviewed=has_reviewed,
-                           recommended_products=recommended_products)
+                           recommended_products=recommended_products,
+                           average_rating=average_rating)
 
 
 # 🌟 팀원분이 추가한 메가 메뉴 동적 데이터 함수 (그대로 유지)

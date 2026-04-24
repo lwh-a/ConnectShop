@@ -86,6 +86,12 @@ class Product(db.Model):
     # 옵션 데이터를 가져오기 위한 연결고리 (1:N 관계)
     options = db.relationship('ProductOption', backref='product', lazy=True)
 
+    @property
+    def avg_rating(self):
+        if not self.reviews:
+            return 0.0
+        return round(sum(r.rating for r in self.reviews) / len(self.reviews), 1)
+
 
 class ProductOption(db.Model):
     id = db.Column(db.Integer, primary_key=True)

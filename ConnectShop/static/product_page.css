@@ -17,8 +17,19 @@
     display: flex;
     flex-direction: column;
     justify-content: center;
+    height: 100%; /* 부모 높이에 맞춤 */
 }
 
+/* 🌟 추가 보정: 제목과 평점이 너무 딱 붙지 않게 */
+.product-title-small {
+    font-size: 0.9rem;
+    font-weight: 600;
+    margin-bottom: 0; /* 마진 제거하여 정렬 맞춤 */
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 250px; /* 제목이 너무 길어지면 잘리도록 설정 */
+}
 #section-images,
 #section-details {
     /* 네비게이션 바 높이가 60px라면 그보다 조금 더 여유 있게(70~80px) 설정하세요 */
@@ -153,6 +164,8 @@
 .product-scroll-container::-webkit-scrollbar {
     height: 4px;
 }
+
+
 .product-scroll-container::-webkit-scrollbar-thumb {
     background: #e0e0e0;
     border-radius: 10px;
@@ -163,6 +176,8 @@
     gap: 20px;                /* 카드 사이 간격 */
     padding: 10px 5px;        /* 카드 그림자가 잘리지 않게 여유 공간 */
 }
+
+
 
 /* 미니 제품 카드 */
 .product-card-mini {
@@ -229,4 +244,23 @@
 .btn-outline-danger i {
     font-size: 1.3rem !important;
     vertical-align: middle;
+}
+.nav-rating {
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+
+
+/* 모바일에서는 제목이 길 수 있으므로 별점을 숨기거나 아주 작게 조정 */
+@media (max-width: 576px) {
+    .nav-rating {
+    font-size: 0.85rem; /* 네비바에 맞게 살짝 축소 */
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    line-height: 1;
+}
 }
