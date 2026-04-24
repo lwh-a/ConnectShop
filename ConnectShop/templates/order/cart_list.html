@@ -104,7 +104,7 @@
 
                         <a href="javascript:void(0);"
                            class="item-delete-link text-danger small text-decoration-none"
-                           onclick="deleteCartItem('{{ item.id }}')">
+                           onclick="processItemDelete('{{ item.id }}'); return false;">
                            삭제
                         </a>
                     </div>
@@ -248,12 +248,27 @@
     }
 
     // 🗑️ 5. 단순 삭제 버튼 클릭 시 호출
-    async function deleteCartItem(cartId) {
-        if (!confirm('정말 삭제하시겠습니까?')) return;
+    async function processItemDelete(cart_id) {
+        if (!confirm("장바구니에서 삭제하시겠습니까?")) return;
 
-        const success = await executeDelete(cartId);
-        if (success) {
-            location.reload(); // 성공 시 화면 갱신
+        try {
+            const response = await fetch(`/order/delete/${cart_id}`, {
+                method: 'POST',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRFToken': getCsrfToken() // 기존에 만들어둔 토큰 함수 사용
+                }
+            });
+
+            if (response.ok) {
+                // 🌟 여기가 핵심: 남은 개수 따지지 않고 무조건 새로고침!
+                // 브라우저가 "지워진 최신 상태"의 HTML을 다시 받아오게 만듭니다.
+                window.location.href = window.location.pathname + "?v=" + Date.now();
+            } else {
+                alert("삭제에 실패했습니다.");
+            }
+        } catch (error) {
+            console.error("Error:", error);
         }
     }
 
