@@ -143,11 +143,15 @@
 /* 추천 상품 컨테이너: 가로 스크롤의 핵심 */
 .product-scroll-container {
     width: 100%;
+    max-width: 100%;
     overflow-x: auto;         /* 가로로 넘치면 스크롤 생성 */
     overflow-y: hidden;       /* 세로 스크롤은 방지 */
+    position: relative;
     white-space: nowrap;      /* 내부 요소들이 줄바꿈되지 않게 함 */
     padding-bottom: 20px;
     -webkit-overflow-scrolling: touch; /* 모바일 부드러운 스크롤 */
+    display: block;
+
 
     /* 아까 추가한 드래그 관련 설정 */
     -webkit-user-select: none;
@@ -172,7 +176,8 @@
 }
 
 .product-scroll-wrapper {
-    display: inline-flex;     /* flex 대신 inline-flex를 써서 가로 폭을 내용만큼 확장 */
+    display: flex;            /* 🌟 inline-flex 대신 flex 사용 권장 */
+    width: fit-content;       /* 🌟 추가: 내부 카드들 너비 합계만큼만 너비 차지 */
     gap: 20px;                /* 카드 사이 간격 */
     padding: 10px 5px;        /* 카드 그림자가 잘리지 않게 여유 공간 */
 }
@@ -263,4 +268,23 @@
     gap: 2px;
     line-height: 1;
 }
+}
+
+/* 별점 컨테이너 */
+.star-rating-base {
+    display: inline-block;
+    position: relative;
+    font-size: 2rem; /* 별 크기 조절 */
+    color: #ddd;     /* 빈 별 색상 (회색) */
+}
+
+/* 채워진 별 (노란색) */
+.star-rating-fill {
+    position: absolute;
+    top: 0;
+    left: 0;
+    color: #ffc107;  /* 채워진 별 색상 (노란색) */
+    overflow: hidden;
+    white-space: nowrap;
+    width: 0%;       /* 이 부분을 자바스크립트나 Jinja2로 조절 */
 }
