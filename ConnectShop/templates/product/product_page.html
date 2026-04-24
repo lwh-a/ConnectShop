@@ -284,11 +284,23 @@
                     {% for p in recommended_products %}
                     <div class="product-card-mini" onclick="location.href='{{ url_for('product.page', product_id=p.id) }}'">
                         <div class="product-img-box">
-                            <img src="/static/images/menu/{{ p.image_path }}" alt="{{ p.name }}" draggable="false">
+                            {% if p.stock <= 0 %}
+                            <div class="sold-out-overlay" style="font-size: 0.8rem;">SOLD OUT</div>
+                            {% endif %}
+                            <img src="/static/images/menu/{{ p.image_path }}" alt="{{ p.name }}" draggable="false"
+                                 style="{% if p.stock <= 0 %}opacity: 0.5; filter: grayscale(100%);{% endif %}">
                         </div>
+
                         <div class="product-info-box">
                             <span class="brand-tag">{{ p.brand }}</span>
                             <p class="name-text">{{ p.name }}</p>
+                            <div class="product-rating-mini d-flex align-items-center mt-1 mb-1" style="gap: 4px;">
+                                <span class="text-warning" style="font-size: 0.85rem;">★</span>
+                                <span class="fw-bold" style="font-size: 0.85rem; color: #333;">{{ p.avg_rating }}</span>
+                                <span class="text-muted" style="font-size: 0.75rem;">({{ p.reviews|length }})</span>
+                            </div>
+
+
                             <p class="price-text">{{ "{:,}".format(p.price) }}원</p>
                         </div>
                     </div>
@@ -304,39 +316,47 @@
         <div class="product-reviews mt-5 pt-4 border-top">
             <h4 class="fw-bold mb-4" id="reviews">상품 리뷰</h4>
             <div class="row mb-5 g-3">
-                <div class="col-md-4 text-center">
-                    <div class="bg-light rounded-4 p-4 h-100 d-flex flex-column justify-content-center border-0 shadow-sm">
+                <div class="col-md-5">
+                    <div class="bg-light rounded-4 p-4 h-100 d-flex flex-column justify-content-center align-items-center border-0 shadow-sm">
                         <span class="text-muted small mb-2">사용자 총점</span>
                         <h2 class="fw-bold mb-2" style="font-size: 3rem;">{{ average_rating }}</h2>
-                        <div class="text-warning fs-4 mb-2">
-                            {# 별점 출력 로직 #}
-                            {% for i in range(5) %}
-                                {% if i < average_rating|int %}
-                                    <i class="bi bi-star-fill"></i>
-                                {% else %}
-                                    <i class="bi bi-star"></i>
-                                {% endif %}
-                            {% endfor %}
+
+                        <div class="star-rating-base mb-2" style="font-size: 1.5rem;">
+                            <div class="stars-unfilled">
+                                <i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i>
+                            </div>
+                            <div class="star-rating-fill" style="width: {{ (average_rating / 5 * 100) }}%;">
+                                <i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i>
+                            </div>
                         </div>
                         <p class="text-muted small mb-0">전체 {{ product.reviews|length }}개의 리뷰</p>
                     </div>
                 </div>
 
-                <div class="col-md-8">
-                    <div class="card border-0 rounded-4 p-4 h-100 d-flex align-items-center bg-white shadow-sm border border-light-subtle">
-                        <div class="d-flex align-items-start">
-                            <i class="bi bi-patch-check text-primary fs-1 me-3"></i>
-                            <div>
-                                <h6 class="fw-bold">투명한 구매 후기</h6>
-                                <p class="text-muted small mb-0" style="line-height: 1.6;">
-                                    ConnectShop은 실제 제품을 구매하고 배송이 완료된 고객님의 리뷰만 노출합니다.
-                                    정직한 리뷰로 더 나은 쇼핑 경험을 만들어주세요.
-                                </p>
-                            </div>
+                <div class="col-md-7">
+                    <div class="card border-0 rounded-4 p-4 h-100 bg-white shadow-sm border border-light-subtle">
+                        <h6 class="fw-bold mb-3 small text-muted">별점 비율</h6>
+                        <div class="rating-distribution">
+                            {% for i in range(5, 0, -1) %}
+                                {% set count = product.reviews | selectattr('rating', 'equalto', i) | list | length %}
+                                {% set percent = (count / product.reviews|length * 100) if product.reviews|length > 0 else 0 %}
+                                <div class="d-flex align-items-center mb-2">
+                                    <span class="small me-3 text-nowrap" style="width: 35px;">{{ i }}점</span>
+                                    <div class="progress flex-fill" style="height: 10px; background-color: #f0f0f0; border-radius: 5px;">
+                                        <div class="progress-bar bg-warning"
+                                             role="progressbar"
+                                             style="width: {{ percent }}%; border-radius: 5px;"
+                                             aria-valuenow="{{ percent }}" aria-valuemin="0" aria-valuemax="100">
+                                        </div>
+                                    </div>
+                                    <span class="small ms-3 text-muted" style="width: 40px; text-align: right;">{{ count }}</span>
+                                </div>
+                            {% endfor %}
                         </div>
                     </div>
                 </div>
             </div>
+        </div>
             {% if g.user %}
                 {% if has_reviewed %}
                     <div class="alert alert-info text-center rounded-4 py-4 mb-5 shadow-sm border-0 bg-light">
