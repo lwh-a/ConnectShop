@@ -60,6 +60,7 @@
 </div>
 
 <script>
+    const csrfToken = "{{ csrf_token() }}";
 // 🌟 1. 장바구니 담기 공통 함수 (카탈로그에서 쓰던 것 재활용)
 async function addCartCatalog(productId) {
     try {
@@ -67,7 +68,8 @@ async function addCartCatalog(productId) {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'X-Requested-With': 'XMLHttpRequest'
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-CSRFToken': csrfToken
             },
             body: JSON.stringify({ quantity: 1, options: "" })
         });
@@ -107,7 +109,8 @@ function removeWishlist(event, productId) {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
-            'X-Requested-With': 'XMLHttpRequest'
+            'X-Requested-With': 'XMLHttpRequest',
+            'X-CSRFToken': csrfToken
         }
     })
     .then(response => response.json())
