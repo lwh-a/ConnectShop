@@ -7,7 +7,16 @@
 <div class="product-fixed-nav shadow-sm">
     <div class="container d-flex justify-content-between align-items-center h-100">
         <div class="nav-left-section">
-            <div class="product-title-small">{{ product.name }}</div>
+            <div class="d-flex align-items-center mb-1">
+                <div class="product-title-small me-2">{{ product.name }}</div>
+
+                <div class="nav-rating">
+                    <span class="text-warning">⭐</span>
+                    <span class="fw-bold">{{ average_rating }}</span>
+                    <span class="text-muted small">({{ product.reviews|length }})</span>
+                </div>
+            </div>
+
             <div class="nav-hyperlinks">
                 <a href="#section-reviews" class="me-2">상품 리뷰</a>
             </div>
@@ -294,6 +303,40 @@
     <div class="container">
         <div class="product-reviews mt-5 pt-4 border-top">
             <h4 class="fw-bold mb-4" id="reviews">상품 리뷰</h4>
+            <div class="row mb-5 g-3">
+                <div class="col-md-4 text-center">
+                    <div class="bg-light rounded-4 p-4 h-100 d-flex flex-column justify-content-center border-0 shadow-sm">
+                        <span class="text-muted small mb-2">사용자 총점</span>
+                        <h2 class="fw-bold mb-2" style="font-size: 3rem;">{{ average_rating }}</h2>
+                        <div class="text-warning fs-4 mb-2">
+                            {# 별점 출력 로직 #}
+                            {% for i in range(5) %}
+                                {% if i < average_rating|int %}
+                                    <i class="bi bi-star-fill"></i>
+                                {% else %}
+                                    <i class="bi bi-star"></i>
+                                {% endif %}
+                            {% endfor %}
+                        </div>
+                        <p class="text-muted small mb-0">전체 {{ product.reviews|length }}개의 리뷰</p>
+                    </div>
+                </div>
+
+                <div class="col-md-8">
+                    <div class="card border-0 rounded-4 p-4 h-100 d-flex align-items-center bg-white shadow-sm border border-light-subtle">
+                        <div class="d-flex align-items-start">
+                            <i class="bi bi-patch-check text-primary fs-1 me-3"></i>
+                            <div>
+                                <h6 class="fw-bold">투명한 구매 후기</h6>
+                                <p class="text-muted small mb-0" style="line-height: 1.6;">
+                                    ConnectShop은 실제 제품을 구매하고 배송이 완료된 고객님의 리뷰만 노출합니다.
+                                    정직한 리뷰로 더 나은 쇼핑 경험을 만들어주세요.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
             {% if g.user %}
                 {% if has_reviewed %}
                     <div class="alert alert-info text-center rounded-4 py-4 mb-5 shadow-sm border-0 bg-light">
@@ -813,10 +856,12 @@ const slider = document.querySelector('.product-scroll-container');
 let isDown = false;
 let startX;
 let scrollLeft;
+let isDragging = false;
 
 /* 3. 드래그 시작 (클릭은 슬라이더 위에서만!) */
 slider.addEventListener('mousedown', (e) => {
     isDown = true;
+    isDragging = false; // 마우스를 누를 땐 일단 false
     slider.classList.add('active');
 
     // 클릭 위치와 현재 스크롤 위치 저장
@@ -834,6 +879,9 @@ window.addEventListener('mousemove', (e) => {
     e.preventDefault();
     const x = e.pageX - slider.offsetLeft;
     const walk = (x - startX) * 1;
+    if (Math.abs(x - startX) > 5) {
+        isDragging = true;
+    }
     slider.scrollLeft = scrollLeft - walk;
 });
 
@@ -844,5 +892,14 @@ window.addEventListener('mouseup', () => {
         slider.classList.remove('active');
     }
 });
+
+    /* 6. 🌟 [신규 추가] 드래그 중 발생한 클릭 무시하기 */
+slider.addEventListener('click', (e) => {
+    if (isDragging) {
+        // 드래그 상태였다면 링크 이동(click)을 막아버림
+        e.preventDefault();
+        e.stopPropagation();
+    }
+}, true); // 'true'는 캡처링 모드로, 자식 요소의 클릭보다 먼저 실행됨
 </script>
 {% endblock %}
