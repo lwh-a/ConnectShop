@@ -44,7 +44,15 @@
 <br>
 
 ## 목차
-
+1. [Diagram](#diagram)
+2. [와이어프레임](#와이어프레임)
+3. [화면구현](#화면구현)
+4. [주요 기능 (Key Features)](#주요-기능-key-features)
+5. [서비스 화면 (Demo)](#서비스-화면-demo)
+6. [프로젝트 보고서](#프로젝트-보고서)
+7. [트러블 슈팅 (Trouble Shooting)](#트러블-슈팅-trouble-shooting)
+8. [추후 추가하고싶은 기능](#추후-추가하고싶은-기능)
+9. [회고](#회고)
 ## Diagram
 <details>
 <summary>usecase</summary>
@@ -76,7 +84,7 @@
 
 <br>
 
-## 🎥 서비스 화면 (Demo)
+## 서비스 화면 (Demo)
 | 메가 메뉴 및 검색 | 장바구니 비동기 처리 |
 | :---: | :---: |
 |  |  |
@@ -86,7 +94,7 @@
 
 ## 프로젝트 보고서
 
-## 🚀 트러블 슈팅 (Trouble Shooting)
+## 트러블 슈팅 (Trouble Shooting)
 
 ### 1. 프론트엔드: 스크롤바 제어와 Sticky Position 충돌 이슈
 * **문제:** 가로 스크롤바를 숨기기 위해 `body`에 `overflow-x: hidden;`을 적용하자, 구매하기 네비게이션 바의 `position: sticky;` 기능이 무효화되는 현상 발생 (부모 요소의 overflow 속성이 hidden일 때 sticky가 해제되는 CSS 특성).
