@@ -11,8 +11,8 @@
 
 ## 같이 개발한 팀원들
 *  **[이강토] (Front/Back):** 
-  * **[김도철] (Front/Back):** 상품 상세 페이지 구현, Sticky Navigation 바 개발, DB 모델링
-  * **[박예인] (Front/Back):** 유저 인증(로그인/회원가입), 리뷰 게시판 구현
+  * **[김도철] (Front/Back):** 
+  * **[박예인] (Front/Back):** 
   * **[이원호] (Front/Back):** 
 
 <br>
