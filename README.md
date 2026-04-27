@@ -1,24 +1,26 @@
-# 🛒 ConnectShop (커넥트샵)
- **트렌디한 전자기기 쇼핑을 위한 최적의 이커머스 플랫폼** <br>
- K-Digital Training AI+X 융합 프로젝트
+# FLASK TEAM PROJECT
+<img width="851" height="371" alt="image" src="https://github.com/user-attachments/assets/bbbcea6e-25ff-438a-b11c-482724c028fa" />
 
+## <img src="https://github.com/user-attachments/assets/a00f6bfc-416c-4fa2-ac6c-3c042a63c0b9" alt="logo" height="70" valign="middle" /> ConnectShop (커넥트샵)
+플라스크를 활용해 구현한  **트렌디한 전자기기 쇼핑을 위한 최적의 이커머스 플랫폼** <br>
 
-
-## 💡 프로젝트 소개
+## 프로젝트 소개
 **ConnectShop**은 최신 스마트폰, 태블릿, 무선이어폰 등 다양한 전자기기를 빠르고 직관적으로 탐색하고 구매할 수 있는 B2C 이커머스 웹 서비스입니다. 
 사용자 중심의 UI/UX 설계와 Docker를 활용한 안정적인 컨테이너 기반 배포에 중점을 두어 개발되었습니다.
+* **개발 기간:** 2026.04.03 ~ 2026.04.28 (3주)
 
-* **개발 기간:** 2026.04.XX ~ 2026.04.XX (O주)
-* **팀 구성:** * **[본인 이름] (팀장 / Full-Stack):** 프로젝트 총괄, Flask 백엔드 아키텍처 설계, Docker 컨테이너 배포, UI/UX 디테일 구현 (장바구니 Ajax, 별점 시스템 등)
-  * **[팀원 1 이름] (Front/Back):** 상품 상세 페이지 구현, Sticky Navigation 바 개발, DB 모델링
-  * **[팀원 2 이름] (Front/Back):** 유저 인증(로그인/회원가입), 리뷰 게시판 구현
+## 같이 개발한 팀원들
+*  **[이강토] (Front/Back):** 
+  * **[김도철] (Front/Back):** 상품 상세 페이지 구현, Sticky Navigation 바 개발, DB 모델링
+  * **[박예인] (Front/Back):** 유저 인증(로그인/회원가입), 리뷰 게시판 구현
+  * **[이원호] (Front/Back):** 
 
 <br>
 
-## 🛠 기술 스택 (Tech Stack)
+## 기술 스택 (Tech Stack)
 
 ### Backend
-<img src="https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white"> <img src="https://img.shields.io/badge/Flask-000000?style=for-the-badge&logo=flask&logoColor=white"> <img src="https://img.shields.io/badge/MySQL-4479A1?style=for-the-badge&logo=mysql&logoColor=white">
+<img src="https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white"> <img src="https://img.shields.io/badge/Flask-000000?style=for-the-badge&logo=flask&logoColor=white">
 
 ### Frontend
 <img src="https://img.shields.io/badge/HTML5-E34F26?style=for-the-badge&logo=html5&logoColor=white"> <img src="https://img.shields.io/badge/CSS3-1572B6?style=for-the-badge&logo=css3&logoColor=white"> <img src="https://img.shields.io/badge/JavaScript-F7DF1E?style=for-the-badge&logo=javascript&logoColor=black">
