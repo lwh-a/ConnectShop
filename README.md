@@ -65,7 +65,7 @@
 </details>
 
 <details>
-<summary>ER/summary>
+<summary>ER</summary>
  <img width="931" height="1565" alt="schema" src="https://github.com/user-attachments/assets/63898d4c-6385-40b0-bb23-75c051f272c2" />
 </details>
 
