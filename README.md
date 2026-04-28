@@ -171,8 +171,8 @@
 ## 서비스 화면 (Demo)
 <details>
 <summary>공통 헤더</summary>
- 
-https://github.com/user-attachments/assets/9c84ece6-f19c-4d44-be23-669decc2ce31
+
+https://github.com/user-attachments/assets/e6526e98-6cf9-44b8-8a3b-d3b6740ea20a
 
 </details>
 
