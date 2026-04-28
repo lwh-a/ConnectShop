@@ -192,11 +192,6 @@ https://github.com/user-attachments/assets/8f5f5d54-efbe-40eb-bde9-eb8920d0915d
 
 https://github.com/user-attachments/assets/eb002cef-8d0e-46fc-90e2-c649b652c689
 
-</details>
-
-<details>
-<summary>주문/배송조회</summary>
-
 https://github.com/user-attachments/assets/24a54fd7-84bc-4dfa-b808-ed5dabf855c7
 
 https://github.com/user-attachments/assets/85ca8e84-98d9-491e-b0b9-a31f91b7bb4a
