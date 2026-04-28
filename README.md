@@ -93,7 +93,7 @@
 여기에 이미지를 넣어주세요
 </details>
 <details>
-<summary>품 상세 페이지</summary>
+<summary>제품 상세 페이지</summary>
 여기에 이미지를 넣어주세요
 </details>
 <details>
