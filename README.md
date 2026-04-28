@@ -176,6 +176,15 @@ https://github.com/user-attachments/assets/9c84ece6-f19c-4d44-be23-669decc2ce31
 
 </details>
 
+<details>
+<summary>FAQ</summary>
+ 
+https://github.com/user-attachments/assets/acdf70b0-cebd-4763-bf89-83fd16564de8
+
+https://github.com/user-attachments/assets/107654da-1e05-4887-8ec8-8a7e631823f8
+
+</details>
+
 <br>
 
 ## 프로젝트 보고서
